@@ -12,6 +12,11 @@ const CHANNEL_TYPES = [
   { label: '企业微信', value: 'WECHAT_WORK' },
   { label: '钉钉', value: 'DINGTALK' },
   { label: '飞书', value: 'FEISHU' },
+  { label: 'Telegram', value: 'TELEGRAM' },
+  { label: 'Slack', value: 'SLACK' },
+  { label: '腾讯云短信', value: 'TENCENT_SMS' },
+  { label: 'Twilio', value: 'TWILIO' },
+  { label: 'Webhook', value: 'WEBHOOK' },
 ];
 
 const ChannelList: React.FC = () => {
