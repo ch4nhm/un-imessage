@@ -24,5 +24,9 @@ public class SysTemplateDto implements Serializable {
     private String deduplicationConfig;
     private List<Long> recipientGroupIds;
     private List<Long> recipientIds;
+    /**
+     * 频率限制 (每秒最大请求数)
+     */
+    private Integer rateLimit;
     private Integer status;
 }

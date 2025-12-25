@@ -39,7 +39,32 @@ public enum ChannelType {
     /**
      * 飞书
      */
-    FEISHU("FEISHU", "飞书");
+    FEISHU("FEISHU", "飞书"),
+
+    /**
+     * Telegram
+     */
+    TELEGRAM("TELEGRAM", "Telegram"),
+
+    /**
+     * Slack
+     */
+    SLACK("SLACK", "Slack"),
+
+    /**
+     * 腾讯云短信
+     */
+    TENCENT_SMS("TENCENT_SMS", "腾讯云短信"),
+
+    /**
+     * Twilio 短信
+     */
+    TWILIO("TWILIO", "Twilio"),
+
+    /**
+     * Webhook
+     */
+    WEBHOOK("WEBHOOK", "Webhook");
 
     /**
      * 渠道类型代码

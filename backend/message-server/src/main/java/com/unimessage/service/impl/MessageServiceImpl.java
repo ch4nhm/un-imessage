@@ -16,6 +16,7 @@ import com.unimessage.handler.ChannelHandlerFactory;
 import com.unimessage.mapper.*;
 import com.unimessage.mq.producer.MqProducer;
 import com.unimessage.service.MessageService;
+import com.unimessage.service.RateLimiterService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,8 @@ public class MessageServiceImpl implements MessageService {
     private ChannelHandlerFactory handlerFactory;
     @Resource
     private MqProducer mqProducer;
+    @Resource
+    private RateLimiterService rateLimiterService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -60,22 +63,32 @@ public class MessageServiceImpl implements MessageService {
             return SendResponse.fail("模板已禁用");
         }
 
+        // 检查频率限制 (基于 App + Template)
+        if (template.getRateLimit() != null && template.getRateLimit() > 0) {
+            Long appId = AppContext.getCurrentAppId();
+            // Key: un-imessage:limiter:app:{appId}:template:{code}
+            String limitKey = "un-imessage:limiter:app:" + (appId != null ? appId : "0") + ":template:" + template.getCode();
+            if (!rateLimiterService.tryAcquire(limitKey, template.getRateLimit(), 1)) {
+                return SendResponse.fail("发送频率超限，请稍后重试");
+            }
+        }
+
         SysChannel channel = getChannel(template.getChannelId());
         if (channel == null) {
             return SendResponse.fail("渠道不可用");
         }
 
-        List<String> finalRecipients = resolveRecipients(request, template, channel);
-        if (finalRecipients.isEmpty()) {
+        Map<String, String> finalRecipientMap = resolveRecipients(request, template, channel);
+        if (finalRecipientMap.isEmpty()) {
             return SendResponse.fail("未指定接收者，且模板未关联有效的接收人或分组");
         }
-        request.setRecipients(finalRecipients);
+        request.setRecipients(new ArrayList<>(finalRecipientMap.keySet()));
 
         if (handlerFactory.getHandler(channel.getType()) == null) {
             return SendResponse.fail("未找到该渠道的处理器: " + channel.getType());
         }
 
-        return createAndPushBatch(request, template, channel, finalRecipients);
+        return createAndPushBatch(request, template, channel, finalRecipientMap);
     }
 
     private SysTemplate getTemplate(String code) {
@@ -89,36 +102,38 @@ public class MessageServiceImpl implements MessageService {
         return (channel != null && channel.getStatus() == 1) ? channel : null;
     }
 
-    private List<String> resolveRecipients(SendRequest request, SysTemplate template, SysChannel channel) {
+    private Map<String, String> resolveRecipients(SendRequest request, SysTemplate template, SysChannel channel) {
         List<String> requestRecipients = request.getRecipients();
         if (requestRecipients != null && !requestRecipients.isEmpty()) {
-            // 如果请求中包含了接收者，直接使用（需提取对应的名称映射，此处简化处理，假设请求自带的优先）
-            // 实际逻辑中如果需要混合处理，可以在这里扩展
-            return requestRecipients;
+            Map<String, String> map = new HashMap<>(requestRecipients.size());
+            for (String r : requestRecipients) {
+                map.put(r, ""); // 手动指定时暂无名称
+            }
+            return map;
         }
 
-        Set<String> recipientSet = new HashSet<>();
+        Map<String, String> recipientMap = new HashMap<>();
         // 1. 从分组获取
         if (template.getRecipientGroupIds() != null && !template.getRecipientGroupIds().isEmpty()) {
-            addRecipientsFromGroups(recipientSet, template.getRecipientGroupIds(), channel.getType());
+            addRecipientsFromGroups(recipientMap, template.getRecipientGroupIds(), channel.getType());
         }
 
         // 2. 从独立接收者列表获取
         if (template.getRecipientIds() != null && !template.getRecipientIds().isEmpty()) {
-            addRecipientsFromIds(recipientSet, template.getRecipientIds(), channel.getType());
+            addRecipientsFromIds(recipientMap, template.getRecipientIds(), channel.getType());
         }
 
-        return new ArrayList<>(recipientSet);
+        return recipientMap;
     }
 
-    private void addRecipientsFromGroups(Set<String> recipientSet, String groupIdsStr, String channelType) {
+    private void addRecipientsFromGroups(Map<String, String> recipientMap, String groupIdsStr, String channelType) {
         String[] groupIds = groupIdsStr.split(",");
         for (String groupIdStr : groupIds) {
             try {
                 Long groupId = Long.parseLong(groupIdStr.trim());
                 List<SysRecipient> groupMembers = recipientMapper.selectByGroupId(groupId);
                 if (groupMembers != null && !groupMembers.isEmpty()) {
-                    recipientSet.addAll(extractRecipientMap(groupMembers, channelType).keySet());
+                    recipientMap.putAll(extractRecipientMap(groupMembers, channelType));
                 }
             } catch (NumberFormatException e) {
                 log.error("Invalid group ID format: {}", groupIdStr);
@@ -126,7 +141,7 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-    private void addRecipientsFromIds(Set<String> recipientSet, String idsStr, String channelType) {
+    private void addRecipientsFromIds(Map<String, String> recipientMap, String idsStr, String channelType) {
         String[] recipientIds = idsStr.split(",");
         List<Long> idList = new ArrayList<>();
         for (String idStr : recipientIds) {
@@ -140,12 +155,12 @@ public class MessageServiceImpl implements MessageService {
         if (!idList.isEmpty()) {
             List<SysRecipient> recipients = recipientMapper.selectBatchIds(idList);
             if (recipients != null && !recipients.isEmpty()) {
-                recipientSet.addAll(extractRecipientMap(recipients, channelType).keySet());
+                recipientMap.putAll(extractRecipientMap(recipients, channelType));
             }
         }
     }
 
-    private SendResponse createAndPushBatch(SendRequest request, SysTemplate template, SysChannel channel, List<String> recipients) {
+    private SendResponse createAndPushBatch(SendRequest request, SysTemplate template, SysChannel channel, Map<String, String> recipientMap) {
         String batchNo = UUID.randomUUID().toString().replace("-", "");
         LogMsgBatch batch = new LogMsgBatch();
         batch.setBatchNo(batchNo);
@@ -158,7 +173,7 @@ public class MessageServiceImpl implements MessageService {
         batch.setTitle(template.getTitle());
         batch.setContent(template.getContent());
         batch.setContentParams(JSON.toJSONString(request.getParams()));
-        batch.setTotalCount(recipients.size());
+        batch.setTotalCount(recipientMap.size());
         batch.setSuccessCount(0);
         batch.setFailCount(0);
         batch.setStatus(BatchStatus.PENDING.getCode());
@@ -168,13 +183,7 @@ public class MessageServiceImpl implements MessageService {
 
         try {
             // Push to Redis MQ
-            // 注意：这里需要重新构建名称映射，因为 resolveRecipients 中可能丢失了名称信息
-            // 简单起见，这里再次调用 extractRecipientMap 或者优化 resolveRecipients 返回结构
-            // 由于时间紧迫，这里假设 recipientNameMap 为空或后续在 processBatch 中补充
-            Map<String, String> recipientNameMap = new HashMap<>(16);
-            // 实际场景应在 resolveRecipients 中同时返回 Map
-
-            MqMessage message = new MqMessage(batch.getId(), request, recipientNameMap);
+            MqMessage message = new MqMessage(batch.getId(), request, recipientMap);
             mqProducer.send(message);
         } catch (Exception e) {
             log.error("Push to MQ failed", e);
@@ -202,10 +211,11 @@ public class MessageServiceImpl implements MessageService {
         Map<String, String> result = new HashMap<>(16);
         for (SysRecipient r : recipients) {
             String contact = switch (type) {
-                case SMS -> r.getMobile();
+                case SMS, TENCENT_SMS, TWILIO -> r.getMobile();
                 case EMAIL -> r.getEmail();
                 case WECHAT_OFFICIAL -> r.getOpenId();
-                case WECHAT_WORK, DINGTALK, FEISHU -> r.getUserId() != null ? r.getUserId() : r.getMobile();
+                case WECHAT_WORK, DINGTALK, FEISHU, TELEGRAM, SLACK, WEBHOOK ->
+                        r.getUserId() != null ? r.getUserId() : r.getMobile();
             };
 
             if (contact != null && !contact.isEmpty()) {
@@ -297,8 +307,10 @@ public class MessageServiceImpl implements MessageService {
                 fail++;
             }
             detail.setSendTime(LocalDateTime.now());
-            detailMapper.updateById(detail);
         }
+
+        // 批量更新详情状态，提升性能
+        Db.updateBatchById(details);
 
         updateBatchStatus(batch, success, fail);
     }

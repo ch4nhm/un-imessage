@@ -1,4 +1,4 @@
-create database if not exists unimessage default character set utf8mb4 collate utf8mb4_general_ci;  
+create database if not exists unimessage default character set utf8mb4 collate utf8mb4_general_ci;
 
 create table unimessage.log_msg_batch
 (
@@ -149,6 +149,7 @@ create table unimessage.sys_template
     created_at           datetime default CURRENT_TIMESTAMP null,
     recipient_group_ids  varchar(255)                       null comment '关联的接收者分组ID列表 (逗号分隔)',
     recipient_ids        varchar(255)                       null comment '关联的接收者ID列表 (逗号分隔)',
+    rate_limit           int      default 0                 null comment '频率限制 (每秒最大请求数, 0或null表示不限制)',
     constraint uk_code
         unique (code)
 )
@@ -179,34 +180,34 @@ create table unimessage.sys_user
 -- =====================================================
 
 -- sys_app 表索引
-CREATE INDEX idx_app_status ON sys_app(status);
-CREATE INDEX idx_app_key ON sys_app(app_key);
+CREATE INDEX idx_app_status ON sys_app (status);
+CREATE INDEX idx_app_key ON sys_app (app_key);
 
 -- sys_channel 表索引
-CREATE INDEX idx_channel_type ON sys_channel(type);
-CREATE INDEX idx_channel_status ON sys_channel(status);
-CREATE INDEX idx_channel_provider ON sys_channel(provider);
+CREATE INDEX idx_channel_type ON sys_channel (type);
+CREATE INDEX idx_channel_status ON sys_channel (status);
+CREATE INDEX idx_channel_provider ON sys_channel (provider);
 
 -- sys_template 表索引
-CREATE INDEX idx_template_status ON sys_template(status);
-CREATE INDEX idx_template_msg_type ON sys_template(msg_type);
-CREATE INDEX idx_template_code ON sys_template(code);
+CREATE INDEX idx_template_status ON sys_template (status);
+CREATE INDEX idx_template_msg_type ON sys_template (msg_type);
+CREATE INDEX idx_template_code ON sys_template (code);
 
 -- sys_recipient 表索引
-CREATE INDEX idx_recipient_email ON sys_recipient(email);
-CREATE INDEX idx_recipient_status ON sys_recipient(status);
+CREATE INDEX idx_recipient_email ON sys_recipient (email);
+CREATE INDEX idx_recipient_status ON sys_recipient (status);
 
 -- sys_recipient_group 表索引
-CREATE INDEX idx_group_code ON sys_recipient_group(code);
+CREATE INDEX idx_group_code ON sys_recipient_group (code);
 
 -- log_msg_batch 表索引
-CREATE INDEX idx_batch_app_id ON log_msg_batch(app_id);
-CREATE INDEX idx_batch_template_id ON log_msg_batch(template_id);
-CREATE INDEX idx_batch_channel_id ON log_msg_batch(channel_id);
-CREATE INDEX idx_batch_status ON log_msg_batch(status);
-CREATE INDEX idx_batch_msg_type ON log_msg_batch(msg_type);
+CREATE INDEX idx_batch_app_id ON log_msg_batch (app_id);
+CREATE INDEX idx_batch_template_id ON log_msg_batch (template_id);
+CREATE INDEX idx_batch_channel_id ON log_msg_batch (channel_id);
+CREATE INDEX idx_batch_status ON log_msg_batch (status);
+CREATE INDEX idx_batch_msg_type ON log_msg_batch (msg_type);
 
 -- log_msg_detail 表索引
-CREATE INDEX idx_detail_status ON log_msg_detail(status);
-CREATE INDEX idx_detail_send_time ON log_msg_detail(send_time);
-CREATE INDEX idx_detail_created_at ON log_msg_detail(created_at);
+CREATE INDEX idx_detail_status ON log_msg_detail (status);
+CREATE INDEX idx_detail_send_time ON log_msg_detail (send_time);
+CREATE INDEX idx_detail_created_at ON log_msg_detail (created_at);

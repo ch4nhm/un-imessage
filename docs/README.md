@@ -18,42 +18,43 @@ UniMessage 是一个企业级统一消息推送平台，采用微服务架构设
 - **企业级**: 权限认证、异常处理、数据安全
 
 ## 🏗️ 技术架构
+
 <p align="center">
   <img src="architecture.svg" alt="系统架构图" width="100%"/>
 </p>
 ### 后端技术栈
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Spring Boot | 3.3.0 | 基础框架 |
-| MyBatis Plus | 3.5.5 | ORM 框架 |
-| Sa-Token | 1.38.0 | 权限认证 |
-| MySQL | 8.0+ | 数据存储 |
-| Redis | 6.0+ | 缓存/Token |
-| Kafka/RocketMQ | - | 消息队列 |
-| FastJSON2 | 2.0.43 | JSON 处理 |
-| Hutool | 5.8.25 | 工具库 |
+| 技术             | 版本     | 说明       |
+|----------------|--------|----------|
+| Spring Boot    | 3.3.0  | 基础框架     |
+| MyBatis Plus   | 3.5.5  | ORM 框架   |
+| Sa-Token       | 1.38.0 | 权限认证     |
+| MySQL          | 8.0+   | 数据存储     |
+| Redis          | 6.0+   | 缓存/Token |
+| Kafka/RocketMQ | -      | 消息队列     |
+| FastJSON2      | 2.0.43 | JSON 处理  |
+| Hutool         | 5.8.25 | 工具库      |
 
 ### 前端技术栈
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| React | 19.2.0 | UI 框架 |
-| TypeScript | 5.9.3 | 类型支持 |
-| Vite | 7.2.4 | 构建工具 |
-| Ant Design | 6.0.1 | UI 组件库 |
-| Axios | 1.13.2 | HTTP 客户端 |
-| ECharts | 6.0.0 | 图表库 |
-| React Router | 7.10.0 | 路由管理 |
+| 技术           | 版本     | 说明       |
+|--------------|--------|----------|
+| React        | 19.2.0 | UI 框架    |
+| TypeScript   | 5.9.3  | 类型支持     |
+| Vite         | 7.2.4  | 构建工具     |
+| Ant Design   | 6.0.1  | UI 组件库   |
+| Axios        | 1.13.2 | HTTP 客户端 |
+| ECharts      | 6.0.0  | 图表库      |
+| React Router | 7.10.0 | 路由管理     |
 
 ### 第三方 SDK
 
-| 渠道 | SDK |
-|------|-----|
-| 阿里云短信 | dysmsapi 2.0.24 |
-| 微信 | weixin-java 4.6.0 |
-| 钉钉 | dingtalk 2.0.14 |
-| 飞书 | oapi-sdk 2.0.28 |
+| 渠道    | SDK               |
+|-------|-------------------|
+| 阿里云短信 | dysmsapi 2.0.24   |
+| 微信    | weixin-java 4.6.0 |
+| 钉钉    | dingtalk 2.0.14   |
+| 飞书    | oapi-sdk 2.0.28   |
 
 ## 📁 项目结构
 
@@ -91,7 +92,6 @@ UniMessage/
     └── database-er.svg               # 数据库 ER 图
 ```
 
-
 ## 🔄 消息发送流程
 
 <p align="center">
@@ -112,18 +112,25 @@ UniMessage/
 ```java
 public interface ChannelHandler {
     boolean support(String channelType);
-    boolean send(SysChannel channel, SysTemplate template, 
+
+    boolean send(SysChannel channel, SysTemplate template,
                  LogMsgDetail msgDetail, Map<String, Object> params);
 }
 ```
 
 已实现的处理器:
+
 - `AliyunSmsHandler` - 阿里云短信
+- `TencentSmsHandler` - 腾讯云短信
+- `TwilioHandler` - Twilio 短信
 - `EmailHandler` - SMTP 邮件
 - `WechatOfficialHandler` - 微信服务号模板消息
 - `WechatWorkHandler` - 企业微信应用消息
 - `DingTalkHandler` - 钉钉工作通知
 - `FeishuHandler` - 飞书消息通知
+- `TelegramHandler` - Telegram 机器人
+- `SlackHandler` - Slack 机器人
+- `WebhookHandler` - 自定义 Webhook
 
 ## 📊 数据库设计
 
@@ -133,33 +140,36 @@ public interface ChannelHandler {
 
 ### 核心表说明
 
-| 表名 | 说明 |
-|------|------|
-| `sys_user` | 系统用户表 |
-| `sys_app` | 接入应用表 (调用方鉴权) |
-| `sys_channel` | 渠道配置表 (短信/邮件/微信等) |
-| `sys_template` | 消息模板表 |
-| `sys_recipient` | 接收者表 |
-| `sys_recipient_group` | 接收者分组表 |
-| `sys_recipient_group_relation` | 分组关联表 (多对多) |
-| `log_msg_batch` | 消息发送批次记录表 |
-| `log_msg_detail` | 消息发送详情表 |
-| `sys_config` | 系统基础配置表 |
+| 表名                             | 说明                |
+|--------------------------------|-------------------|
+| `sys_user`                     | 系统用户表             |
+| `sys_app`                      | 接入应用表 (调用方鉴权)     |
+| `sys_channel`                  | 渠道配置表 (短信/邮件/微信等) |
+| `sys_template`                 | 消息模板表             |
+| `sys_recipient`                | 接收者表              |
+| `sys_recipient_group`          | 接收者分组表            |
+| `sys_recipient_group_relation` | 分组关联表 (多对多)       |
+| `log_msg_batch`                | 消息发送批次记录表         |
+| `log_msg_detail`               | 消息发送详情表           |
+| `sys_config`                   | 系统基础配置表           |
 
 ### 状态码定义
 
 **消息类型 (msg_type)**:
+
 - `10` - 通知消息
 - `20` - 营销消息
 - `30` - 验证码
 
 **批次状态 (batch.status)**:
+
 - `0` - 处理中
 - `10` - 全部成功
 - `20` - 部分成功
 - `30` - 全部失败
 
 **详情状态 (detail.status)**:
+
 - `10` - 发送中
 - `20` - 发送成功
 - `30` - 发送失败
@@ -201,6 +211,7 @@ npm run dev
 ### SDK 集成
 
 ```xml
+
 <dependency>
     <groupId>com.unimessage</groupId>
     <artifactId>message-api</artifactId>
@@ -219,6 +230,7 @@ un-imessage:
 ```
 
 ```java
+
 @Resource
 private UniMessageClient uniMessageClient;
 
@@ -227,14 +239,13 @@ public void sendMessage() {
     request.setTemplateCode("SMS_VERIFY_CODE");
     request.setRecipients(List.of("13800138000"));
     request.setParams(Map.of("code", "123456", "minutes", "5"));
-    
+
     SendResponse response = uniMessageClient.send(request);
     if (response.isSuccess()) {
         System.out.println("发送成功，批次号: " + response.getBatchNo());
     }
 }
 ```
-
 
 ## 📡 API 接口
 
@@ -256,6 +267,7 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -266,18 +278,18 @@ Content-Type: application/json
 
 ### 管理接口
 
-| 接口 | 方法 | 说明 |
-|------|------|------|
-| `/api/v1/auth/login` | POST | 用户登录 |
-| `/api/v1/template` | CRUD | 模板管理 |
-| `/api/v1/channel` | CRUD | 渠道管理 |
-| `/api/v1/recipient` | CRUD | 接收者管理 |
-| `/api/v1/recipient-group` | CRUD | 接收者分组 |
-| `/api/v1/app` | CRUD | 应用管理 |
-| `/api/v1/user` | CRUD | 用户管理 |
-| `/api/v1/log/batch/page` | GET | 批次日志查询 |
-| `/api/v1/log/detail/page` | GET | 详情日志查询 |
-| `/api/v1/log/detail/{id}/retry` | POST | 消息重试 |
+| 接口                              | 方法   | 说明     |
+|---------------------------------|------|--------|
+| `/api/v1/auth/login`            | POST | 用户登录   |
+| `/api/v1/template`              | CRUD | 模板管理   |
+| `/api/v1/channel`               | CRUD | 渠道管理   |
+| `/api/v1/recipient`             | CRUD | 接收者管理  |
+| `/api/v1/recipient-group`       | CRUD | 接收者分组  |
+| `/api/v1/app`                   | CRUD | 应用管理   |
+| `/api/v1/user`                  | CRUD | 用户管理   |
+| `/api/v1/log/batch/page`        | GET  | 批次日志查询 |
+| `/api/v1/log/detail/page`       | GET  | 详情日志查询 |
+| `/api/v1/log/detail/{id}/retry` | POST | 消息重试   |
 
 ## 🔐 安全特性
 
@@ -296,15 +308,16 @@ Content-Type: application/json
 3. 添加 `@Component` 注解，自动注册到工厂
 
 ```java
+
 @Component
 public class NewChannelHandler implements ChannelHandler {
     @Override
     public boolean support(String channelType) {
         return "NEW_CHANNEL".equals(channelType);
     }
-    
+
     @Override
-    public boolean send(SysChannel channel, SysTemplate template, 
+    public boolean send(SysChannel channel, SysTemplate template,
                         LogMsgDetail msgDetail, Map<String, Object> params) {
         // 实现发送逻辑
         return true;
@@ -314,7 +327,7 @@ public class NewChannelHandler implements ChannelHandler {
 
 ### 切换消息队列
 
-项目支持 Kafka 和 RocketMQ，通过配置切换:
+项目支持默认使用Redis作为消息队列，也支持切换到 Kafka 和 RocketMQ，通过配置切换:
 
 ```yaml
 # Kafka
@@ -339,6 +352,7 @@ rocketmq:
 - 示例消息批次和详情记录
 
 执行测试数据:
+
 ```bash
 mysql -u root -p unimessage < backend/message-server/src/main/resources/sql/test_data.sql
 ```

@@ -80,6 +80,11 @@ public class SysTemplate implements Serializable {
     private String recipientIds;
 
     /**
+     * 频率限制 (每秒最大请求数, 0或null表示不限制)
+     */
+    private Integer rateLimit;
+
+    /**
      * 状态
      */
     private Integer status;
