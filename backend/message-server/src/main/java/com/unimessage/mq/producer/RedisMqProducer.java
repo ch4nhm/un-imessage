@@ -1,10 +1,11 @@
 package com.unimessage.mq.producer;
 
 import com.alibaba.fastjson2.JSON;
+import com.unimessage.cache.CacheService;
+import com.unimessage.constant.CacheKeyConstants;
 import com.unimessage.dto.MqMessage;
 import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,13 +17,11 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "un-imessage.mq.type", havingValue = "redis", matchIfMissing = true)
 public class RedisMqProducer implements MqProducer {
 
-    private static final String MQ_KEY = "un-imessage:send:queue";
-
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private CacheService cacheService;
 
     @Override
     public void send(MqMessage message) {
-        stringRedisTemplate.opsForList().leftPush(MQ_KEY, JSON.toJSONString(message));
+        cacheService.lPush(CacheKeyConstants.MQ_SEND_QUEUE, JSON.toJSONString(message));
     }
 }

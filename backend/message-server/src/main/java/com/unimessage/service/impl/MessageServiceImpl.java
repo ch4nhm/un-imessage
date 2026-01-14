@@ -3,6 +3,8 @@ package com.unimessage.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
+import com.unimessage.cache.CacheService;
+import com.unimessage.constant.CacheKeyConstants;
 import com.unimessage.context.AppContext;
 import com.unimessage.dto.MqMessage;
 import com.unimessage.dto.SendRequest;
@@ -13,7 +15,10 @@ import com.unimessage.enums.ChannelType;
 import com.unimessage.enums.DetailStatus;
 import com.unimessage.handler.ChannelHandler;
 import com.unimessage.handler.ChannelHandlerFactory;
-import com.unimessage.mapper.*;
+import com.unimessage.mapper.LogMsgBatchMapper;
+import com.unimessage.mapper.SysChannelMapper;
+import com.unimessage.mapper.SysRecipientMapper;
+import com.unimessage.mapper.SysTemplateMapper;
 import com.unimessage.mq.producer.MqProducer;
 import com.unimessage.service.MessageService;
 import com.unimessage.service.RateLimiterService;
@@ -42,8 +47,6 @@ public class MessageServiceImpl implements MessageService {
     @Resource
     private LogMsgBatchMapper batchMapper;
     @Resource
-    private LogMsgDetailMapper detailMapper;
-    @Resource
     private SysRecipientMapper recipientMapper;
     @Resource
     private ChannelHandlerFactory handlerFactory;
@@ -51,6 +54,8 @@ public class MessageServiceImpl implements MessageService {
     private MqProducer mqProducer;
     @Resource
     private RateLimiterService rateLimiterService;
+    @Resource
+    private CacheService cacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -66,8 +71,10 @@ public class MessageServiceImpl implements MessageService {
         // 检查频率限制 (基于 App + Template)
         if (template.getRateLimit() != null && template.getRateLimit() > 0) {
             Long appId = AppContext.getCurrentAppId();
-            // Key: un-imessage:limiter:app:{appId}:template:{code}
-            String limitKey = "un-imessage:limiter:app:" + (appId != null ? appId : "0") + ":template:" + template.getCode();
+            // Key: uni-message:rate-limit:template:{appId}:{code}
+            String limitKey = cacheService.buildKey(CacheKeyConstants.RATE_LIMIT_TEMPLATE,
+                    (appId != null ? appId.toString() : "0"), ":", template.getCode());
+
             if (!rateLimiterService.tryAcquire(limitKey, template.getRateLimit(), 1)) {
                 return SendResponse.fail("发送频率超限，请稍后重试");
             }
@@ -107,7 +114,8 @@ public class MessageServiceImpl implements MessageService {
         if (requestRecipients != null && !requestRecipients.isEmpty()) {
             Map<String, String> map = new HashMap<>(requestRecipients.size());
             for (String r : requestRecipients) {
-                map.put(r, ""); // 手动指定时暂无名称
+                // 手动指定时暂无名称
+                map.put(r, "");
             }
             return map;
         }

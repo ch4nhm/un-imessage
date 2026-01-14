@@ -55,3 +55,16 @@ sa-token:
 un-imessage:
   mq:
     type: redis
+  # 短链接服务配置
+  short-url:
+    domain: http://localhost:8079
+    code-length: 6
+    default-ttl: 0
+    rate-limit:
+      enabled: true
+      max-requests-per-minute: 100
+      global-max-requests-per-minute: 10000
+    auto-ban:
+      enabled: true
+      threshold: 10
+      duration: 3600

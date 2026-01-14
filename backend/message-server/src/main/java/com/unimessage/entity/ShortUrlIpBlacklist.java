@@ -7,15 +7,17 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
- * 系统配置实体类
+ * IP黑名单表
  *
  * @author 海明
+ * @since 2026-01-14
  */
 @Data
-@TableName("sys_config")
-public class SysConfig implements Serializable {
+@TableName("short_url_ip_blacklist")
+public class ShortUrlIpBlacklist implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -23,17 +25,19 @@ public class SysConfig implements Serializable {
     private Long id;
 
     /**
-     * 系统名称
+     * IP地址
      */
-    private String systemName;
+    private String ip;
 
     /**
-     * 系统Logo (Base64)
+     * 封禁原因
      */
-    private String logo;
+    private String reason;
 
     /**
-     * 系统图标 (Base64)
+     * 解封时间 (NULL表示永久封禁)
      */
-    private String icon;
+    private LocalDateTime expireAt;
+
+    private LocalDateTime createdAt;
 }

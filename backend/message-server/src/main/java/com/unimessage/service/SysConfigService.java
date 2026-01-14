@@ -8,6 +8,7 @@ import com.unimessage.entity.SysConfig;
  * <p>
  * 提供系统配置信息的获取和更新功能，继承自通用服务接口IService
  * </p>
+ *
  * @author 海明
  */
 public interface SysConfigService extends IService<SysConfig> {

@@ -1,6 +1,6 @@
 package com.unimessage.sdk.autoconfigure;
 
-import com.unimessage.sdk.client.DefaultUniMessageClient;
+import com.unimessage.sdk.client.impl.UniMessageClientImpl;
 import com.unimessage.sdk.client.UniMessageClient;
 import com.unimessage.sdk.config.UniMessageProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -25,6 +25,6 @@ public class UniMessageAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public UniMessageClient uniMessageClient(UniMessageProperties properties) {
-        return new DefaultUniMessageClient(properties);
+        return new UniMessageClientImpl(properties);
     }
 }

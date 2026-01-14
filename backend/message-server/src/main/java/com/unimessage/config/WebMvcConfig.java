@@ -34,6 +34,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 // 排除登录接口
                 .excludePathPatterns("/api/v1/auth/login")
                 // 排除健康检查
-                .excludePathPatterns("/api/health");
+                .excludePathPatterns("/api/health")
+                // 排除短链接重定向 (由单独的Controller处理，不在/api路径下)
+                .excludePathPatterns("/s/**");
     }
 }

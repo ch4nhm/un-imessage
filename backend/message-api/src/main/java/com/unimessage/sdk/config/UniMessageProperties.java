@@ -70,4 +70,12 @@ public class UniMessageProperties {
         String protocol = useSsl ? "https" : "http";
         return String.format("%s://%s:%d/api/v1/message", protocol, host, port);
     }
+
+    /**
+     * 获取短链接服务基础 URL
+     */
+    public String getShortUrlBaseUrl() {
+        String protocol = useSsl ? "https" : "http";
+        return String.format("%s://%s:%d/api/v1/short-url", protocol, host, port);
+    }
 }

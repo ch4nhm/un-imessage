@@ -11,6 +11,7 @@ import DetailList from './pages/message/DetailList';
 import RecipientList from './pages/recipient/RecipientList';
 import RecipientGroupList from './pages/recipient/RecipientGroupList';
 import SystemConfigPage from './pages/system/SystemConfig';
+import ShortUrlList from './pages/shorturl/ShortUrlList';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
@@ -41,6 +42,7 @@ function App() {
             <Route path="recipient-groups" element={<RecipientGroupList />} />
             <Route path="logs/batch" element={<BatchList />} />
             <Route path="logs/detail" element={<DetailList />} />
+            <Route path="short-urls" element={<ShortUrlList />} />
             <Route path="system/config" element={<SystemConfigPage />} />
         </Route>
       </Routes>

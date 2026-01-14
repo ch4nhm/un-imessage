@@ -7,15 +7,17 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
- * 系统配置实体类
+ * 短链接访问日志表
  *
  * @author 海明
+ * @since 2026-01-14
  */
 @Data
-@TableName("sys_config")
-public class SysConfig implements Serializable {
+@TableName("short_url_access_log")
+public class ShortUrlAccessLog implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -23,17 +25,27 @@ public class SysConfig implements Serializable {
     private Long id;
 
     /**
-     * 系统名称
+     * 短链码
      */
-    private String systemName;
+    private String shortCode;
 
     /**
-     * 系统Logo (Base64)
+     * 访问者IP
      */
-    private String logo;
+    private String ip;
 
     /**
-     * 系统图标 (Base64)
+     * User-Agent
      */
-    private String icon;
+    private String userAgent;
+
+    /**
+     * 来源页面
+     */
+    private String referer;
+
+    /**
+     * 访问时间
+     */
+    private LocalDateTime accessTime;
 }
