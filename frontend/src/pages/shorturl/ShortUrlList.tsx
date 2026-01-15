@@ -122,25 +122,52 @@ const ShortUrlList: React.FC = () => {
       title: '短链码',
       dataIndex: 'shortCode',
       key: 'shortCode',
-      width: 120,
-      render: (code) => <Text code>{code}</Text>,
+      width: 140,
+      render: (code) => (
+        <Space size={4}>
+          <Tag color="purple" style={{ margin: 0, fontFamily: 'monospace', fontSize: 13 }}>
+            {code}
+          </Tag>
+          <Tooltip title="复制短链码">
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined style={{ fontSize: 12, color: '#8c8c8c' }} />}
+              onClick={() => copyToClipboard(code)}
+              style={{ padding: '0 4px', height: 22 }}
+            />
+          </Tooltip>
+        </Space>
+      ),
     },
     {
       title: '短链接',
       dataIndex: 'shortUrl',
       key: 'shortUrl',
-      width: 280,
+      width: 320,
       render: (url) => (
-        <Space>
-          <Link href={url} target="_blank">
-            <LinkOutlined /> {url}
+        <Space size={4} style={{ display: 'flex', alignItems: 'center' }}>
+          <LinkOutlined style={{ color: '#1890ff', fontSize: 14 }} />
+          <Link 
+            href={url} 
+            target="_blank" 
+            style={{ 
+              maxWidth: 240, 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap',
+              display: 'inline-block'
+            }}
+          >
+            {url}
           </Link>
-          <Tooltip title="复制">
+          <Tooltip title="复制短链接">
             <Button
               type="text"
               size="small"
-              icon={<CopyOutlined />}
+              icon={<CopyOutlined style={{ fontSize: 12, color: '#8c8c8c' }} />}
               onClick={() => copyToClipboard(url)}
+              style={{ padding: '0 4px', height: 22 }}
             />
           </Tooltip>
         </Space>
@@ -152,40 +179,81 @@ const ShortUrlList: React.FC = () => {
       key: 'originalUrl',
       ellipsis: true,
       render: (url) => (
-        <Tooltip title={url}>
-          <Link href={url} target="_blank" style={{ maxWidth: 300, display: 'inline-block' }}>
-            {url}
-          </Link>
-        </Tooltip>
+        <Space size={4} style={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title={url}>
+            <Link 
+              href={url} 
+              target="_blank" 
+              style={{ 
+                maxWidth: 280, 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis', 
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+                color: '#595959'
+              }}
+            >
+              {url}
+            </Link>
+          </Tooltip>
+          <Tooltip title="复制原始链接">
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined style={{ fontSize: 12, color: '#8c8c8c' }} />}
+              onClick={() => copyToClipboard(url)}
+              style={{ padding: '0 4px', height: 22 }}
+            />
+          </Tooltip>
+        </Space>
       ),
     },
     {
       title: '点击量',
       dataIndex: 'clickCount',
       key: 'clickCount',
-      width: 100,
-      render: (count) => <Tag color="blue">{count}</Tag>,
+      width: 90,
+      align: 'center',
+      render: (count) => (
+        <Tag 
+          color={count > 100 ? 'gold' : count > 10 ? 'blue' : 'default'} 
+          style={{ minWidth: 40, textAlign: 'center' }}
+        >
+          {count}
+        </Tag>
+      ),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 80,
+      align: 'center',
       render: (status) =>
-        status === 1 ? <Tag color="green">启用</Tag> : <Tag color="red">禁用</Tag>,
+        status === 1 ? (
+          <Tag color="success" style={{ margin: 0 }}>启用</Tag>
+        ) : (
+          <Tag color="error" style={{ margin: 0 }}>禁用</Tag>
+        ),
     },
     {
       title: '过期时间',
       dataIndex: 'expireAt',
       key: 'expireAt',
-      width: 180,
-      render: (time) => time || <Text type="secondary">永不过期</Text>,
+      width: 170,
+      render: (time) => 
+        time ? (
+          <Text style={{ fontSize: 13 }}>{time}</Text>
+        ) : (
+          <Tag color="cyan" style={{ margin: 0 }}>永不过期</Tag>
+        ),
     },
     {
       title: '创建时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 180,
+      width: 170,
+      render: (time) => <Text type="secondary" style={{ fontSize: 13 }}>{time}</Text>,
     },
     {
       title: '操作',
