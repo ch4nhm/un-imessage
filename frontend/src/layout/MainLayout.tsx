@@ -326,9 +326,11 @@ const MainLayout: React.FC = () => {
             margin: '24px 16px',
             padding: 24,
             minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            ...(location.pathname === '/' ? {} : {
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            })
           }}
         >
           <Outlet />
