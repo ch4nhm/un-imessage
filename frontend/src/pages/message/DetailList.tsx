@@ -121,9 +121,13 @@ const DetailList: React.FC = () => {
       fixed: 'right',
       width: 100,
       render: (_, record) => (
-        record.status === 30 ? (
-            <Button type="link" onClick={() => handleRetry(record.id)}>重试</Button>
-        ) : null
+        <Button 
+          type="link" 
+          disabled={record.status !== 30}
+          onClick={() => handleRetry(record.id)}
+        >
+          重试
+        </Button>
       ),
     },
   ];
