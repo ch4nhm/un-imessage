@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Tag, message, Tooltip, Card, Form, Input, Select, Space, Typography } from 'antd';
+import { Table, Button, Tag, message, Card, Form, Input, Select, Space, Typography } from 'antd';
 
 const { Paragraph } = Typography;
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
@@ -82,8 +82,16 @@ const DetailList: React.FC = () => {
         title: '发送内容',
         dataIndex: 'content',
         key: 'content',
-        ellipsis: true,
-        render: (text) => text ? <Tooltip title={text}>{text}</Tooltip> : '-'
+        width: 250,
+        render: (text) => text ? (
+          <Paragraph 
+            ellipsis={{ rows: 2, expandable: true, symbol: '展开' }} 
+            style={{ marginBottom: 0, fontSize: 12 }}
+            copyable
+          >
+            {text}
+          </Paragraph>
+        ) : '-'
     },
     {
         title: '状态',

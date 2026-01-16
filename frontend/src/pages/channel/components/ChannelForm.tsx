@@ -51,6 +51,9 @@ const ChannelForm: React.FC<ChannelFormProps> = ({type}) => {
                         <Form.Item name="secret" label="AppSecret" rules={[{required: true}]}>
                             <Input.Password/>
                         </Form.Item>
+                        <Form.Item name="redirectUrl" label="跳转链接" tooltip="点击模板消息后跳转的URL">
+                            <Input placeholder="https://example.com/detail"/>
+                        </Form.Item>
                     </>
                 );
             case 'WECHAT_WORK':
