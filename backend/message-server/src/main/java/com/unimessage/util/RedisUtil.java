@@ -187,6 +187,24 @@ public class RedisUtil {
     }
 
     /**
+     * 如果不存在则设置（原子操作，用于分布式锁/幂等性校验）
+     *
+     * @param key     键
+     * @param value   值
+     * @param seconds 过期时间（秒）
+     * @return true 设置成功（键不存在），false 键已存在
+     */
+    public boolean setIfAbsent(String key, String value, long seconds) {
+        try {
+            Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(key, value, seconds, TimeUnit.SECONDS);
+            return Boolean.TRUE.equals(result);
+        } catch (Exception e) {
+            log.error("Redis setIfAbsent error: key={}", key, e);
+            return false;
+        }
+    }
+
+    /**
      * 递增
      *
      * @param key   键

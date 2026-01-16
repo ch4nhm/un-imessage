@@ -212,4 +212,16 @@ public class CacheService {
         return value != null ? value : defaultValue;
     }
 
+    /**
+     * 如果不存在则设置（用于幂等性校验）
+     *
+     * @param key     键
+     * @param value   值
+     * @param seconds 过期时间（秒）
+     * @return true 设置成功（键不存在），false 键已存在
+     */
+    public boolean setIfAbsent(String key, String value, long seconds) {
+        return redisUtil.setIfAbsent(key, value, seconds);
+    }
+
 }

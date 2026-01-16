@@ -1,5 +1,6 @@
 package com.unimessage.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -27,5 +28,6 @@ public class LogMsgBatchRespDto implements Serializable {
     private Integer successCount;
     private Integer failCount;
     private Integer status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 }

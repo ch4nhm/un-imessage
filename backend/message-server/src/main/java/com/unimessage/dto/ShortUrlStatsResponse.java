@@ -1,5 +1,6 @@
 package com.unimessage.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,6 +48,7 @@ public class ShortUrlStatsResponse implements Serializable {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     /**
@@ -61,6 +63,7 @@ public class ShortUrlStatsResponse implements Serializable {
     public static class AccessRecord implements Serializable {
         private String ip;
         private String userAgent;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime accessTime;
     }
 }

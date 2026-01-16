@@ -60,6 +60,17 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SendResponse send(SendRequest request) {
+        // 幂等性校验：如果提供了 bizId，检查是否已处理过
+        if (request.getBizId() != null && !request.getBizId().isEmpty()) {
+            String dedupeKey = cacheService.buildKey(CacheKeyConstants.RATE_LIMIT_TEMPLATE, "dedupe:", request.getBizId());
+            // 尝试设置，如果已存在则返回 false
+            if (!cacheService.setIfAbsent(dedupeKey, "1", 24 * 60 * 60)) {
+                log.warn("重复请求被拦截, bizId={}", request.getBizId());
+                // 查询已有的批次号返回
+                return SendResponse.fail("重复请求，bizId 已处理: " + request.getBizId());
+            }
+        }
+
         SysTemplate template = getTemplate(request.getTemplateCode());
         if (template == null) {
             return SendResponse.fail("模板不存在: " + request.getTemplateCode());

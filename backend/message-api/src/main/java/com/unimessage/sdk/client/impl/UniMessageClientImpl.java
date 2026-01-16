@@ -40,6 +40,10 @@ public class UniMessageClientImpl implements UniMessageClient {
 
     @Override
     public SendResponse send(SendRequest request) {
+        // 如果没有提供 bizId，自动生成一个用于幂等性校验
+        if (request.getBizId() == null || request.getBizId().isEmpty()) {
+            request.setBizId(java.util.UUID.randomUUID().toString().replace("-", ""));
+        }
         String url = properties.getBaseUrl() + "/send";
         return executeWithRetry(url, request, SendResponse.class);
     }
