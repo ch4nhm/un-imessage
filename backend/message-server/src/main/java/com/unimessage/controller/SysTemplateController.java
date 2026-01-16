@@ -33,10 +33,14 @@ public class SysTemplateController {
     @GetMapping("/page")
     public Result<IPage<SysTemplate>> page(@RequestParam(defaultValue = "1") Integer current,
                                            @RequestParam(defaultValue = "10") Integer size,
+                                           @RequestParam(required = false) Long appId,
                                            @RequestParam(required = false) Long channelId,
                                            @RequestParam(required = false) String name) {
         Page<SysTemplate> page = new Page<>(current, size);
         LambdaQueryWrapper<SysTemplate> wrapper = new LambdaQueryWrapper<>();
+        if (appId != null) {
+            wrapper.eq(SysTemplate::getAppId, appId);
+        }
         if (channelId != null) {
             wrapper.eq(SysTemplate::getChannelId, channelId);
         }
@@ -51,9 +55,13 @@ public class SysTemplateController {
      * 查询所有可用模板
      */
     @GetMapping("/list")
-    public Result<List<SysTemplate>> list(@RequestParam(required = false) Long channelId) {
+    public Result<List<SysTemplate>> list(@RequestParam(required = false) Long appId,
+                                          @RequestParam(required = false) Long channelId) {
         LambdaQueryWrapper<SysTemplate> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysTemplate::getStatus, 1);
+        if (appId != null) {
+            wrapper.eq(SysTemplate::getAppId, appId);
+        }
         if (channelId != null) {
             wrapper.eq(SysTemplate::getChannelId, channelId);
         }

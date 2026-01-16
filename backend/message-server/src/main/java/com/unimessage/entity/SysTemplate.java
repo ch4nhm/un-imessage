@@ -35,6 +35,11 @@ public class SysTemplate implements Serializable {
     private String code;
 
     /**
+     * 关联的应用ID (null表示公共模板)
+     */
+    private Long appId;
+
+    /**
      * 关联的渠道ID
      */
     private Long channelId;

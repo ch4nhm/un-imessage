@@ -16,6 +16,8 @@ import {getRecipientGroupList} from '../../api/recipientGroup';
 
 import type {Recipient} from '../../api/recipient';
 import {getRecipientList} from '../../api/recipient';
+import type {App} from '../../api/app';
+import {getAppList} from '../../api/app';
 
 const TemplateList: React.FC = () => {
     const [loading, setLoading] = useState(false);
@@ -26,6 +28,7 @@ const TemplateList: React.FC = () => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [groups, setGroups] = useState<RecipientGroup[]>([]);
     const [recipients, setRecipients] = useState<Recipient[]>([]);
+    const [apps, setApps] = useState<App[]>([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -73,11 +76,21 @@ const TemplateList: React.FC = () => {
         }
     }
 
+    const loadApps = async () => {
+        try {
+            const res = await getAppList();
+            setApps(res as any);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     useEffect(() => {
         loadData();
         loadChannels();
         loadGroups();
         loadRecipients();
+        loadApps();
     }, []);
 
     const handleCreate = () => {
@@ -159,6 +172,16 @@ const TemplateList: React.FC = () => {
             key: 'thirdPartyId',
             width: 150,
             ellipsis: true,
+        },
+        {
+            title: '所属应用',
+            dataIndex: 'appId',
+            key: 'appId',
+            render: (appId) => {
+                if (!appId) return <Tag>公共模板</Tag>;
+                const app = apps.find(a => a.id === appId);
+                return app ? app.appName : appId;
+            }
         },
         {
             title: '渠道',
@@ -251,6 +274,13 @@ const TemplateList: React.FC = () => {
                     </Form.Item>
                     <Form.Item name="code" label="模板代码" rules={[{required: true}]}>
                         <Input placeholder="唯一标识，如 LOGIN_CODE"/>
+                    </Form.Item>
+                    <Form.Item name="appId" label="所属应用" tooltip="留空表示公共模板，所有应用可用">
+                        <Select
+                            allowClear
+                            placeholder="留空表示公共模板"
+                            options={apps.map(a => ({label: a.appName, value: a.id}))}
+                        />
                     </Form.Item>
                     <Form.Item name="channelId" label="发送渠道" rules={[{required: true}]}>
                         <Select options={channels.map(c => ({label: c.name, value: c.id}))}/>
