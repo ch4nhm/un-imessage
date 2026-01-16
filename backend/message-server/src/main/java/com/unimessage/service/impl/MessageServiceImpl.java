@@ -246,9 +246,22 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void processBatch(MqMessage message) {
+        // 幂等性校验：防止同一批次被重复处理
+        String processKey = cacheService.buildKey(CacheKeyConstants.RATE_LIMIT_TEMPLATE, "batch:process:", message.getBatchId().toString());
+        if (!cacheService.setIfAbsent(processKey, "1", 24 * 60 * 60)) {
+            log.warn("批次已处理，跳过重复消费, batchId={}", message.getBatchId());
+            return;
+        }
+
         LogMsgBatch batch = batchMapper.selectById(message.getBatchId());
         if (batch == null) {
             log.error("Batch not found: {}", message.getBatchId());
+            return;
+        }
+
+        // 检查批次状态，如果已经不是 PENDING 状态，说明已处理过
+        if (batch.getStatus() != BatchStatus.PENDING.getCode()) {
+            log.warn("批次状态非待处理，跳过, batchId={}, status={}", message.getBatchId(), batch.getStatus());
             return;
         }
 
