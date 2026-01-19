@@ -188,6 +188,7 @@ public class MessageServiceImpl implements MessageService {
         batch.setTemplateName(template.getName());
         batch.setChannelId(channel.getId());
         batch.setChannelName(channel.getName());
+        batch.setChannelType(channel.getType());
         batch.setMsgType(template.getMsgType());
         batch.setTitle(template.getTitle());
         batch.setContent(template.getContent());

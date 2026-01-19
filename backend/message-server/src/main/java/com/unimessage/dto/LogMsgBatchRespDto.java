@@ -20,6 +20,7 @@ public class LogMsgBatchRespDto implements Serializable {
     private String templateName;
     private Long channelId;
     private String channelName;
+    private String channelType;
     private Integer msgType;
     private String title;
     private String content;

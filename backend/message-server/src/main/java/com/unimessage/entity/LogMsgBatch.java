@@ -56,6 +56,11 @@ public class LogMsgBatch implements Serializable {
     private String channelName;
 
     /**
+     * 渠道类型快照
+     */
+    private String channelType;
+
+    /**
      * 冗余消息类型
      */
     private Integer msgType;
