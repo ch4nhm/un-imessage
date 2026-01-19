@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Button, Input, Modal, Form, message, Space, Popconfirm, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Input, Modal, Form, message, Space, Popconfirm, Tag, Select, Divider } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { 
   getRecipientPage, 
@@ -8,7 +8,7 @@ import {
   updateRecipient, 
   deleteRecipient
 } from '../../api/recipient';
-import type { Recipient } from '../../api/recipient';
+import type { Recipient, UserIdItem } from '../../api/recipient';
 
 const RecipientList: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +23,16 @@ const RecipientList: React.FC = () => {
   
   const [searchName, setSearchName] = useState('');
   const [searchMobile, setSearchMobile] = useState('');
+
+  // 渠道类型选项
+  const CHANNEL_TYPES = [
+    { label: '微信服务号', value: 'WECHAT_OFFICIAL' },
+    { label: '企业微信', value: 'WECHAT_WORK' },
+    { label: '钉钉', value: 'DINGTALK' },
+    { label: '飞书', value: 'FEISHU' },
+    { label: 'Telegram', value: 'TELEGRAM' },
+    { label: 'Slack', value: 'SLACK' },
+  ];
 
   const loadData = async (page = current, size = pageSize) => {
     setLoading(true);
@@ -56,12 +66,34 @@ const RecipientList: React.FC = () => {
   const handleCreate = () => {
     setEditingId(null);
     form.resetFields();
+    // 设置默认的 userIds 数组
+    form.setFieldsValue({
+      userIds: [{ channelType: '', userId: '' }]
+    });
     setIsModalOpen(true);
   };
 
   const handleEdit = (record: Recipient) => {
     setEditingId(record.id);
-    form.setFieldsValue(record);
+    
+    // 解析 userId JSON 字符串为表单数据
+    let userIds: UserIdItem[] = [];
+    if (record.userId) {
+      try {
+        const userIdObj = JSON.parse(record.userId);
+        userIds = Object.entries(userIdObj).map(([channelType, userId]) => ({
+          channelType,
+          userId: userId as string
+        }));
+      } catch (e) {
+        console.warn('解析 userId JSON 失败:', e);
+      }
+    }
+    
+    form.setFieldsValue({
+      ...record,
+      userIds: userIds.length > 0 ? userIds : [{ channelType: '', userId: '' }]
+    });
     setIsModalOpen(true);
   };
 
@@ -78,11 +110,30 @@ const RecipientList: React.FC = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
+      
+      // 将 userIds 数组转换为 JSON 字符串
+      let userId = '';
+      if (values.userIds && values.userIds.length > 0) {
+        const userIdObj: Record<string, string> = {};
+        values.userIds.forEach((item: UserIdItem) => {
+          if (item.channelType && item.userId) {
+            userIdObj[item.channelType] = item.userId;
+          }
+        });
+        userId = Object.keys(userIdObj).length > 0 ? JSON.stringify(userIdObj) : '';
+      }
+      
+      const payload = {
+        ...values,
+        userId,
+        userIds: undefined // 移除临时字段
+      };
+      
       if (editingId) {
-        await updateRecipient(editingId, values);
+        await updateRecipient(editingId, payload);
         message.success('更新成功');
       } else {
-        await createRecipient(values);
+        await createRecipient(payload);
         message.success('创建成功');
       }
       setIsModalOpen(false);
@@ -119,6 +170,30 @@ const RecipientList: React.FC = () => {
       title: 'UserId',
       dataIndex: 'userId',
       ellipsis: true,
+      render: (userId: string) => {
+        if (!userId) return '-';
+        try {
+          const userIdObj = JSON.parse(userId);
+          const entries = Object.entries(userIdObj);
+          if (entries.length === 0) return '-';
+          
+          return (
+            <div>
+              {entries.map(([channelType, id]) => {
+                const channel = CHANNEL_TYPES.find(c => c.value === channelType);
+                return (
+                  <div key={channelType} style={{ fontSize: '12px', marginBottom: '2px' }}>
+                    <Tag color="blue">{channel?.label || channelType}</Tag>
+                    <span style={{ marginLeft: '4px' }}>{id as string}</span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        } catch (e) {
+          return userId; // 如果不是 JSON 格式，直接显示原值
+        }
+      }
     },
     {
       title: '状态',
@@ -206,6 +281,7 @@ const RecipientList: React.FC = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={() => setIsModalOpen(false)}
+        width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="姓名" rules={[{ required: true }]}>
@@ -220,9 +296,46 @@ const RecipientList: React.FC = () => {
           <Form.Item name="openId" label="微信OpenID">
             <Input />
           </Form.Item>
-          <Form.Item name="userId" label="企业用户ID (钉钉/飞书/企微)">
-            <Input />
-          </Form.Item>
+          
+          <Divider>企业用户ID配置</Divider>
+          <Form.List name="userIds">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'channelType']}
+                      rules={[{ required: true, message: '请选择渠道类型' }]}
+                      style={{ width: 150 }}
+                    >
+                      <Select placeholder="选择渠道类型">
+                        {CHANNEL_TYPES.map(channel => (
+                          <Select.Option key={channel.value} value={channel.value}>
+                            {channel.label}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'userId']}
+                      rules={[{ required: true, message: '请输入用户ID' }]}
+                      style={{ flex: 1 }}
+                    >
+                      <Input placeholder="输入用户ID" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block>
+                    + 添加渠道用户ID
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
         </Form>
       </Modal>
     </div>

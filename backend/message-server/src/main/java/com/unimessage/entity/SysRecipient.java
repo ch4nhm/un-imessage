@@ -46,7 +46,8 @@ public class SysRecipient implements Serializable {
     private String openId;
 
     /**
-     * 企微/钉钉/飞书 UserId
+     * 各渠道用户ID (JSON格式)
+     * 格式: {"WECHAT_WORK": "userid1", "DINGTALK": "userid2", "FEISHU": "userid3", ...}
      */
     private String userId;
 
