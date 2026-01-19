@@ -5,19 +5,20 @@ import type { ColumnsType } from 'antd/es/table';
 import { getChannelPage, createChannel, updateChannel, deleteChannel, updateChannelStatus, testChannel } from '../../api/channel';
 import type { Channel } from '../../api/channel';
 import ChannelForm from './components/ChannelForm';
+import ChannelIcon from './components/ChannelIcon';
 
 const CHANNEL_TYPES = [
-  { label: '阿里云短信', value: 'SMS' },
-  { label: '邮件', value: 'EMAIL' },
-  { label: '微信服务号', value: 'WECHAT_OFFICIAL' },
-  { label: '企业微信', value: 'WECHAT_WORK' },
-  { label: '钉钉', value: 'DINGTALK' },
-  { label: '飞书', value: 'FEISHU' },
-  { label: 'Telegram', value: 'TELEGRAM' },
-  { label: 'Slack', value: 'SLACK' },
-  { label: '腾讯云短信', value: 'TENCENT_SMS' },
-  { label: 'Twilio', value: 'TWILIO' },
-  { label: 'Webhook', value: 'WEBHOOK' },
+  { label: '阿里云短信', value: 'SMS', icon: 'SMS' },
+  { label: '邮件', value: 'EMAIL', icon: 'EMAIL' },
+  { label: '微信服务号', value: 'WECHAT_OFFICIAL', icon: 'WECHAT_OFFICIAL' },
+  { label: '企业微信', value: 'WECHAT_WORK', icon: 'WECHAT_WORK' },
+  { label: '钉钉', value: 'DINGTALK', icon: 'DINGTALK' },
+  { label: '飞书', value: 'FEISHU', icon: 'FEISHU' },
+  { label: 'Telegram', value: 'TELEGRAM', icon: 'TELEGRAM' },
+  { label: 'Slack', value: 'SLACK', icon: 'SLACK' },
+  { label: '腾讯云短信', value: 'TENCENT_SMS', icon: 'TENCENT_SMS' },
+  { label: 'Twilio', value: 'TWILIO', icon: 'TWILIO' },
+  { label: 'Webhook', value: 'WEBHOOK', icon: 'WEBHOOK' },
 ];
 
 const ChannelList: React.FC = () => {
@@ -144,7 +145,12 @@ const ChannelList: React.FC = () => {
       key: 'type',
       render: (type) => {
           const found = CHANNEL_TYPES.find(t => t.value === type);
-          return found ? found.label : type;
+          return (
+            <Space align="center">
+              <ChannelIcon type={type} size={18} />
+              <span>{found ? found.label : type}</span>
+            </Space>
+          );
       }
     },
     {
@@ -211,10 +217,28 @@ const ChannelList: React.FC = () => {
           </Form.Item>
           <Form.Item name="type" label="渠道类型" rules={[{ required: true }]}>
             <Select 
-              options={CHANNEL_TYPES} 
               onChange={(value) => setSelectedType(value)}
               disabled={!!editingId}
-            />
+              optionLabelProp="label"
+            >
+              {CHANNEL_TYPES.map(channel => (
+                <Select.Option 
+                  key={channel.value} 
+                  value={channel.value}
+                  label={
+                    <Space align="center">
+                      <ChannelIcon type={channel.icon} size={16} />
+                      <span>{channel.label}</span>
+                    </Space>
+                  }
+                >
+                  <Space align="center">
+                    <ChannelIcon type={channel.icon} size={16} />
+                    <span>{channel.label}</span>
+                  </Space>
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           
           {selectedType && <ChannelForm type={selectedType} />}

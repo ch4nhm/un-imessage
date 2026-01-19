@@ -19,6 +19,7 @@ import type {Recipient} from '../../api/recipient';
 import {getRecipientList} from '../../api/recipient';
 import type {App} from '../../api/app';
 import {getAppList} from '../../api/app';
+import ChannelIcon from '../channel/components/ChannelIcon';
 
 const TemplateList: React.FC = () => {
     const [loading, setLoading] = useState(false);
@@ -190,7 +191,12 @@ const TemplateList: React.FC = () => {
             key: 'channelId',
             render: (channelId) => {
                 const channel = channels.find(c => c.id === channelId);
-                return channel ? channel.name : channelId;
+                return channel ? (
+                    <Space align="center">
+                        <ChannelIcon type={channel.type} size={16} />
+                        <span>{channel.name}</span>
+                    </Space>
+                ) : channelId;
             }
         },
         {
@@ -284,7 +290,16 @@ const TemplateList: React.FC = () => {
                         />
                     </Form.Item>
                     <Form.Item name="channelId" label="发送渠道" rules={[{required: true}]}>
-                        <Select options={channels.map(c => ({label: c.name, value: c.id}))}/>
+                        <Select>
+                            {channels.map(c => (
+                                <Select.Option key={c.id} value={c.id}>
+                                    <Space align="center">
+                                        <ChannelIcon type={c.type} size={16} />
+                                        <span>{c.name}</span>
+                                    </Space>
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item name="thirdPartyId" label="第三方模板ID (可选)">

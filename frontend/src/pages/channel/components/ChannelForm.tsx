@@ -1,11 +1,31 @@
 import React from 'react';
-import {Form, Input, InputNumber, Switch} from 'antd';
+import {Form, Input, InputNumber, Switch, Space, Typography} from 'antd';
+import ChannelIcon from '../components/ChannelIcon';
+
+const { Text } = Typography;
 
 interface ChannelFormProps {
     type: string;
 }
 
 const ChannelForm: React.FC<ChannelFormProps> = ({type}) => {
+    const getChannelTitle = (channelType: string) => {
+        const typeMap: Record<string, string> = {
+            'SMS': '阿里云短信',
+            'EMAIL': '邮件',
+            'WECHAT_OFFICIAL': '微信服务号',
+            'WECHAT_WORK': '企业微信',
+            'DINGTALK': '钉钉',
+            'FEISHU': '飞书',
+            'TELEGRAM': 'Telegram',
+            'SLACK': 'Slack',
+            'TENCENT_SMS': '腾讯云短信',
+            'TWILIO': 'Twilio',
+            'WEBHOOK': 'Webhook'
+        };
+        return typeMap[channelType] || channelType;
+    };
+
     const renderFields = () => {
         switch (type) {
             case 'SMS':
@@ -164,7 +184,19 @@ const ChannelForm: React.FC<ChannelFormProps> = ({type}) => {
         }
     };
 
-    return <>{renderFields()}</>;
+    return (
+        <>
+            {type && (
+                <div style={{ marginBottom: 16, padding: '12px 16px', background: '#f5f5f5', borderRadius: 8 }}>
+                    <Space align="center">
+                        <ChannelIcon type={type} size={20} />
+                        <Text strong style={{ fontSize: 16 }}>{getChannelTitle(type)} 配置</Text>
+                    </Space>
+                </div>
+            )}
+            {renderFields()}
+        </>
+    );
 };
 
 export default ChannelForm;
