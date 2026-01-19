@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Card, Drawer, Form, Input, InputNumber, message, Popconfirm, Select, Space, Table, Tag} from 'antd';
-import { EditOutlined, PoweroffOutlined, DeleteOutlined } from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, PoweroffOutlined} from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 import type {Template} from '../../api/template';
 import {
@@ -193,7 +193,7 @@ const TemplateList: React.FC = () => {
                 const channel = channels.find(c => c.id === channelId);
                 return channel ? (
                     <Space align="center">
-                        <ChannelIcon type={channel.type} size={16} />
+                        <ChannelIcon type={channel.type} size={16}/>
                         <span>{channel.name}</span>
                     </Space>
                 ) : channelId;
@@ -228,13 +228,13 @@ const TemplateList: React.FC = () => {
             fixed: 'right',
             width: 200,
             render: (_, record) => (
-                <Space size="middle">
-                    <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
-                    <Button type="link" icon={<PoweroffOutlined />} onClick={() => handleStatusChange(record)}>
+                <Space size="small">
+                    <Button type="link" icon={<EditOutlined/>} onClick={() => handleEdit(record)}>编辑</Button>
+                    <Button type="link" icon={<PoweroffOutlined/>} onClick={() => handleStatusChange(record)}>
                         {record.status === 1 ? '禁用' : '启用'}
                     </Button>
                     <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                        <Button type="link" danger icon={<DeleteOutlined/>}>删除</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -294,7 +294,7 @@ const TemplateList: React.FC = () => {
                             {channels.map(c => (
                                 <Select.Option key={c.id} value={c.id}>
                                     <Space align="center">
-                                        <ChannelIcon type={c.type} size={16} />
+                                        <ChannelIcon type={c.type} size={16}/>
                                         <span>{c.name}</span>
                                     </Space>
                                 </Select.Option>
