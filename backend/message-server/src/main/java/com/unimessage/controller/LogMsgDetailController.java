@@ -55,14 +55,17 @@ public class LogMsgDetailController {
     }
 
     /**
-     * 根据批次ID查询所有详情
+     * 根据批次ID分页查询详情
      */
     @GetMapping("/batch/{batchId}")
-    public Result<List<LogMsgDetail>> getByBatchId(@PathVariable Long batchId) {
+    public Result<IPage<LogMsgDetail>> getByBatchId(@PathVariable Long batchId,
+                                                    @RequestParam(defaultValue = "1") Integer current,
+                                                    @RequestParam(defaultValue = "10") Integer size) {
+        Page<LogMsgDetail> page = new Page<>(current, size);
         LambdaQueryWrapper<LogMsgDetail> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(LogMsgDetail::getBatchId, batchId);
         wrapper.orderByDesc(LogMsgDetail::getCreatedAt);
-        return Result.success(detailMapper.selectList(wrapper));
+        return Result.success(detailMapper.selectPage(page, wrapper));
     }
 
     /**
