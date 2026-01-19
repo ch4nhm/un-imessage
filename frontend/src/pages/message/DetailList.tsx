@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Tag, message, Card, Form, Input, Select, Space, Typography } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 
 const { Paragraph } = Typography;
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getDetailPage, retryMessage } from '../../api/message';
 
@@ -142,6 +142,7 @@ const DetailList: React.FC = () => {
         <Button 
           type="link" 
           disabled={record.status !== 30}
+          icon={<ReloadOutlined />}
           onClick={() => handleRetry(record.id)}
         >
           重试

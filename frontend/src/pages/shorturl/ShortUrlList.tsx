@@ -3,7 +3,7 @@ import {
   Table, Button, Space, Modal, Form, Input, InputNumber, message,
   Popconfirm, Tag, Card, Typography, Tooltip, Drawer, Descriptions, List
 } from 'antd';
-import { CopyOutlined, BarChartOutlined, LinkOutlined } from '@ant-design/icons';
+import { CopyOutlined, BarChartOutlined, LinkOutlined, PoweroffOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import {
   getShortUrlPage, createShortUrl, disableShortUrl, enableShortUrl,
@@ -287,11 +287,11 @@ const ShortUrlList: React.FC = () => {
           >
             统计
           </Button>
-          <Button type="link" size="small" onClick={() => handleToggleStatus(record)}>
+          <Button type="link" size="small" icon={<PoweroffOutlined />} onClick={() => handleToggleStatus(record)}>
             {record.status === 1 ? '禁用' : '启用'}
           </Button>
           <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.shortCode)}>
-            <Button type="link" size="small" danger>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
               删除
             </Button>
           </Popconfirm>

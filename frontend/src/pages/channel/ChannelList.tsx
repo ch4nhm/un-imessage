@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Space, Modal, Form, Input, Select, message, Popconfirm, Tag, Card } from 'antd';
+import { EditOutlined, PoweroffOutlined, ExperimentOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getChannelPage, createChannel, updateChannel, deleteChannel, updateChannelStatus, testChannel } from '../../api/channel';
 import type { Channel } from '../../api/channel';
@@ -164,13 +165,13 @@ const ChannelList: React.FC = () => {
       width: 250,
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record)}>编辑</Button>
-          <Button type="link" onClick={() => handleStatusChange(record)}>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
+          <Button type="link" icon={<PoweroffOutlined />} onClick={() => handleStatusChange(record)}>
             {record.status === 1 ? '禁用' : '启用'}
           </Button>
-          <Button type="link" onClick={() => handleTest(record.id)}>测试</Button>
+          <Button type="link" icon={<ExperimentOutlined />} onClick={() => handleTest(record.id)}>测试</Button>
           <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" danger>删除</Button>
+            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
