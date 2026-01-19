@@ -9,6 +9,7 @@ import {
   deleteRecipient
 } from '../../api/recipient';
 import type { Recipient, UserIdItem } from '../../api/recipient';
+import ChannelIcon from '../channel/components/ChannelIcon';
 
 const RecipientList: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -183,8 +184,11 @@ const RecipientList: React.FC = () => {
                 const channel = CHANNEL_TYPES.find(c => c.value === channelType);
                 return (
                   <div key={channelType} style={{ fontSize: '12px', marginBottom: '2px' }}>
-                    <Tag color="blue">{channel?.label || channelType}</Tag>
-                    <span style={{ marginLeft: '4px' }}>{id as string}</span>
+                    <Space align="center" size={4}>
+                      <ChannelIcon type={channelType} size={14} />
+                      <Tag color="blue">{channel?.label || channelType}</Tag>
+                      <span>{id as string}</span>
+                    </Space>
                   </div>
                 );
               })}
@@ -312,7 +316,10 @@ const RecipientList: React.FC = () => {
                       <Select placeholder="选择渠道类型">
                         {CHANNEL_TYPES.map(channel => (
                           <Select.Option key={channel.value} value={channel.value}>
-                            {channel.label}
+                            <Space align="center" size={4}>
+                              <ChannelIcon type={channel.value} size={16} />
+                              <span>{channel.label}</span>
+                            </Space>
                           </Select.Option>
                         ))}
                       </Select>
