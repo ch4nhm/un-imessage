@@ -22,6 +22,7 @@ import com.unimessage.mapper.SysTemplateMapper;
 import com.unimessage.mq.producer.MqProducer;
 import com.unimessage.service.MessageService;
 import com.unimessage.service.RateLimiterService;
+import com.unimessage.util.UserIdUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -234,8 +235,12 @@ public class MessageServiceImpl implements MessageService {
                 case SMS, TENCENT_SMS, TWILIO -> r.getMobile();
                 case EMAIL -> r.getEmail();
                 case WECHAT_OFFICIAL -> r.getOpenId();
-                case WECHAT_WORK, DINGTALK, FEISHU, TELEGRAM, SLACK, WEBHOOK ->
-                        r.getUserId() != null ? r.getUserId() : r.getMobile();
+                case WECHAT_WORK, DINGTALK, FEISHU, TELEGRAM, SLACK, WEBHOOK -> {
+                    // 从JSON格式的userId中提取对应渠道的用户ID
+                    String userId = extractUserIdByChannelType(r.getUserId(), channelType);
+                    // 如果没有对应渠道的userId，回退到手机号
+                    yield userId != null ? userId : r.getMobile();
+                }
             };
 
             if (contact != null && !contact.isEmpty()) {
@@ -243,6 +248,17 @@ public class MessageServiceImpl implements MessageService {
             }
         }
         return result;
+    }
+
+    /**
+     * 从JSON格式的userId字符串中提取指定渠道类型的用户ID
+     *
+     * @param userIdJson  JSON格式的用户ID字符串
+     * @param channelType 渠道类型
+     * @return 对应渠道的用户ID，如果不存在则返回null
+     */
+    private String extractUserIdByChannelType(String userIdJson, String channelType) {
+        return UserIdUtil.getUserId(userIdJson, channelType);
     }
 
     @Override
@@ -261,7 +277,7 @@ public class MessageServiceImpl implements MessageService {
         }
 
         // 检查批次状态，如果已经不是 PENDING 状态，说明已处理过
-        if (batch.getStatus() != BatchStatus.PENDING.getCode()) {
+        if (!batch.getStatus().equals(BatchStatus.PENDING.getCode())) {
             log.warn("批次状态非待处理，跳过, batchId={}, status={}", message.getBatchId(), batch.getStatus());
             return;
         }
