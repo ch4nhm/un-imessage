@@ -98,9 +98,9 @@ const BatchList: React.FC = () => {
             key: 'batchNo',
         },
         {
-            title: '应用ID',
-            dataIndex: 'appId',
-            key: 'appId',
+            title: '应用',
+            dataIndex: 'appName',
+            key: 'appName',
             width: 80,
         },
         {

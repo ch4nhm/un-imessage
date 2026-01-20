@@ -7,7 +7,9 @@ import com.unimessage.common.Result;
 import com.unimessage.dto.BatchStatisticsDto;
 import com.unimessage.dto.LogMsgBatchRespDto;
 import com.unimessage.entity.LogMsgBatch;
+import com.unimessage.entity.SysApp;
 import com.unimessage.mapper.LogMsgBatchMapper;
+import com.unimessage.mapper.SysAppMapper;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +29,9 @@ public class LogMsgBatchController {
 
     @Resource
     private LogMsgBatchMapper batchMapper;
+
+    @Resource
+    private SysAppMapper appMapper;
 
     /**
      * 分页查询批次列表
@@ -58,7 +63,7 @@ public class LogMsgBatchController {
         if (endTime != null && !endTime.isEmpty()) {
             wrapper.le(LogMsgBatch::getCreatedAt, LocalDateTime.parse(endTime));
         }
-        if (StringUtils.isNotBlank(batchNo)){
+        if (StringUtils.isNotBlank(batchNo)) {
             wrapper.like(LogMsgBatch::getBatchNo, batchNo);
         }
 
@@ -125,6 +130,11 @@ public class LogMsgBatchController {
         }
         LogMsgBatchRespDto dto = new LogMsgBatchRespDto();
         BeanUtils.copyProperties(batch, dto);
+
+        SysApp app = appMapper.selectById(batch.getAppId());
+        if (app != null) {
+            dto.setAppName(app.getAppName());
+        }
         return dto;
     }
 }

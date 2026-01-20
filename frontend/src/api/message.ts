@@ -5,6 +5,7 @@ export interface Batch {
     id: number;
     batchNo: string;
     appId: number;
+    appName: string;
     templateId: number;
     channelId: number;
     msgType: number;

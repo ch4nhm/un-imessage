@@ -16,6 +16,7 @@ public class LogMsgBatchRespDto implements Serializable {
     private Long id;
     private String batchNo;
     private Long appId;
+    private String appName;
     private Long templateId;
     private String templateName;
     private Long channelId;
