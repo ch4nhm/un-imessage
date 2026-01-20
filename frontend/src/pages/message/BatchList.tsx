@@ -101,7 +101,6 @@ const BatchList: React.FC = () => {
             title: '应用',
             dataIndex: 'appName',
             key: 'appName',
-            width: 80,
         },
         {
             title: '模板',
