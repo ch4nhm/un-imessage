@@ -85,5 +85,5 @@ VALUES ('192.168.1.100', '恶意刷访问', NULL);
 
 -- sys_user
 INSERT INTO sys_user (id, username, password, nickname, status)
-VALUES (1, 'admin', 'admin123', '管理员', 1),
-       (2, 'operator', 'operator123', '运营人员', 1);
+VALUES (1, 'admin', '$2a$10$i/HNdMLxxirCZCRIBoW6A.InbFWJS.B3EedfRcV1C1uAVHlpwR9EO', '管理员', 1),
+       (2, 'operator', '$2a$10$i/HNdMLxxirCZCRIBoW6A.InbFWJS.B3EedfRcV1C1uAVHlpwR9EO', '运营人员', 1);
