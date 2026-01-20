@@ -9,6 +9,7 @@ import com.unimessage.dto.LogMsgBatchRespDto;
 import com.unimessage.entity.LogMsgBatch;
 import com.unimessage.mapper.LogMsgBatchMapper;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +38,7 @@ public class LogMsgBatchController {
                                                   @RequestParam(required = false) Long channelId,
                                                   @RequestParam(required = false) Integer status,
                                                   @RequestParam(required = false) String startTime,
+                                                  @RequestParam(required = false) String batchNo,
                                                   @RequestParam(required = false) String endTime) {
         Page<LogMsgBatch> page = new Page<>(current, size);
         LambdaQueryWrapper<LogMsgBatch> wrapper = new LambdaQueryWrapper<>();
@@ -55,6 +57,9 @@ public class LogMsgBatchController {
         }
         if (endTime != null && !endTime.isEmpty()) {
             wrapper.le(LogMsgBatch::getCreatedAt, LocalDateTime.parse(endTime));
+        }
+        if (StringUtils.isNotBlank(batchNo)){
+            wrapper.like(LogMsgBatch::getBatchNo, batchNo);
         }
 
         wrapper.orderByDesc(LogMsgBatch::getCreatedAt);
