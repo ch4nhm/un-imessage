@@ -1,9 +1,9 @@
 package com.unimessage.service.impl;
 
+import com.unimessage.cache.CacheService;
 import com.unimessage.service.RateLimiterService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +39,9 @@ public class RateLimiterServiceImpl implements RateLimiterService {
                     "    return 1 " +
                     "end";
     private final DefaultRedisScript<Long> redisScript;
+
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private CacheService cacheService;
 
     public RateLimiterServiceImpl() {
         redisScript = new DefaultRedisScript<>();
@@ -54,7 +55,7 @@ public class RateLimiterServiceImpl implements RateLimiterService {
             return true;
         }
         try {
-            Long result = stringRedisTemplate.execute(redisScript, Collections.singletonList(key), String.valueOf(limit), String.valueOf(windowSeconds));
+            Long result = cacheService.getRedisUtil().execute(redisScript, Collections.singletonList(key), String.valueOf(limit), String.valueOf(windowSeconds));
             return result != null && result == 1L;
         } catch (Exception e) {
             log.error("Rate limit check failed", e);

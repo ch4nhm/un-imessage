@@ -34,4 +34,12 @@ public interface LogMsgDetailMapper extends BaseMapper<LogMsgDetail> {
      */
     @Select("SELECT CAST(status AS CHAR) as name, COUNT(*) as value FROM log_msg_detail GROUP BY status")
     List<ChartDataDto> getStatusDist();
+
+    /**
+     * 获取最近30天发送状态分布
+     *
+     * @return 状态分布统计列表
+     */
+    @Select("SELECT CAST(status AS CHAR) as name, COUNT(*) as value FROM log_msg_detail WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY status")
+    List<ChartDataDto> getStatusDistRecent();
 }

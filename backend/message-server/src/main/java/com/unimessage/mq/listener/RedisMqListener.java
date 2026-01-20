@@ -1,6 +1,8 @@
 package com.unimessage.mq.listener;
 
 import com.alibaba.fastjson2.JSON;
+import com.unimessage.cache.CacheService;
+import com.unimessage.constant.CacheKeyConstants;
 import com.unimessage.dto.MqMessage;
 import com.unimessage.service.MessageService;
 import jakarta.annotation.PostConstruct;
@@ -8,7 +10,6 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
@@ -23,7 +24,6 @@ import java.util.concurrent.*;
 @ConditionalOnProperty(name = "un-imessage.mq.type", havingValue = "redis", matchIfMissing = true)
 public class RedisMqListener {
 
-    private static final String MQ_KEY = "un-imessage:send:queue";
     private static final String THREAD_NAME_PREFIX_WORKER = "mq-worker-";
     private static final String THREAD_NAME_POLLER = "mq-poller";
     private static final int CORE_POOL_SIZE = 10;
@@ -34,7 +34,7 @@ public class RedisMqListener {
     private static final long SHUTDOWN_TIMEOUT = 60;
 
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private CacheService cacheService;
     @Resource
     private MessageService messageService;
     /**
@@ -80,7 +80,7 @@ public class RedisMqListener {
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 // 阻塞式弹出，超时时间 5秒
-                String messageJson = stringRedisTemplate.opsForList().rightPop(MQ_KEY, POP_TIMEOUT, TimeUnit.SECONDS);
+                String messageJson = cacheService.rPop(CacheKeyConstants.MQ_SEND_QUEUE, POP_TIMEOUT, TimeUnit.SECONDS);
                 if (messageJson != null) {
                     // 提交给业务线程池处理
                     workerExecutor.submit(() -> processMessage(messageJson));

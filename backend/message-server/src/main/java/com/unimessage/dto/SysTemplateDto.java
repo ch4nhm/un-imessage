@@ -15,6 +15,7 @@ public class SysTemplateDto implements Serializable {
     private Long id;
     private String name;
     private String code;
+    private Long appId;
     private Long channelId;
     private Integer msgType;
     private String thirdPartyId;

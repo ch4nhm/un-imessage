@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Card, Drawer, Form, Input, InputNumber, message, Popconfirm, Select, Space, Table, Tag} from 'antd';
+import {DeleteOutlined, EditOutlined, PoweroffOutlined} from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 import type {Template} from '../../api/template';
 import {
@@ -16,6 +17,9 @@ import {getRecipientGroupList} from '../../api/recipientGroup';
 
 import type {Recipient} from '../../api/recipient';
 import {getRecipientList} from '../../api/recipient';
+import type {App} from '../../api/app';
+import {getAppList} from '../../api/app';
+import ChannelIcon from '../channel/components/ChannelIcon';
 
 const TemplateList: React.FC = () => {
     const [loading, setLoading] = useState(false);
@@ -26,6 +30,7 @@ const TemplateList: React.FC = () => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [groups, setGroups] = useState<RecipientGroup[]>([]);
     const [recipients, setRecipients] = useState<Recipient[]>([]);
+    const [apps, setApps] = useState<App[]>([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -73,11 +78,21 @@ const TemplateList: React.FC = () => {
         }
     }
 
+    const loadApps = async () => {
+        try {
+            const res = await getAppList();
+            setApps(res as any);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     useEffect(() => {
         loadData();
         loadChannels();
         loadGroups();
         loadRecipients();
+        loadApps();
     }, []);
 
     const handleCreate = () => {
@@ -161,12 +176,27 @@ const TemplateList: React.FC = () => {
             ellipsis: true,
         },
         {
+            title: '所属应用',
+            dataIndex: 'appId',
+            key: 'appId',
+            render: (appId) => {
+                if (!appId) return <Tag>公共模板</Tag>;
+                const app = apps.find(a => a.id === appId);
+                return app ? app.appName : appId;
+            }
+        },
+        {
             title: '渠道',
             dataIndex: 'channelId',
             key: 'channelId',
             render: (channelId) => {
                 const channel = channels.find(c => c.id === channelId);
-                return channel ? channel.name : channelId;
+                return channel ? (
+                    <Space align="center">
+                        <ChannelIcon type={channel.type} size={16}/>
+                        <span>{channel.name}</span>
+                    </Space>
+                ) : channelId;
             }
         },
         {
@@ -198,13 +228,13 @@ const TemplateList: React.FC = () => {
             fixed: 'right',
             width: 200,
             render: (_, record) => (
-                <Space size="middle">
-                    <Button type="link" onClick={() => handleEdit(record)}>编辑</Button>
-                    <Button type="link" onClick={() => handleStatusChange(record)}>
+                <Space size="small">
+                    <Button type="link" icon={<EditOutlined/>} onClick={() => handleEdit(record)}>编辑</Button>
+                    <Button type="link" icon={<PoweroffOutlined/>} onClick={() => handleStatusChange(record)}>
                         {record.status === 1 ? '禁用' : '启用'}
                     </Button>
                     <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger>删除</Button>
+                        <Button type="link" danger icon={<DeleteOutlined/>}>删除</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -252,8 +282,24 @@ const TemplateList: React.FC = () => {
                     <Form.Item name="code" label="模板代码" rules={[{required: true}]}>
                         <Input placeholder="唯一标识，如 LOGIN_CODE"/>
                     </Form.Item>
+                    <Form.Item name="appId" label="所属应用" tooltip="留空表示公共模板，所有应用可用">
+                        <Select
+                            allowClear
+                            placeholder="留空表示公共模板"
+                            options={apps.map(a => ({label: a.appName, value: a.id}))}
+                        />
+                    </Form.Item>
                     <Form.Item name="channelId" label="发送渠道" rules={[{required: true}]}>
-                        <Select options={channels.map(c => ({label: c.name, value: c.id}))}/>
+                        <Select>
+                            {channels.map(c => (
+                                <Select.Option key={c.id} value={c.id}>
+                                    <Space align="center">
+                                        <ChannelIcon type={c.type} size={16}/>
+                                        <span>{c.name}</span>
+                                    </Space>
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item name="thirdPartyId" label="第三方模板ID (可选)">

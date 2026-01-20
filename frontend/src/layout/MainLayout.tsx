@@ -18,6 +18,7 @@ import {
   FileTextOutlined,
   ApiOutlined,
   DesktopOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout, getUserInfo } from '../api/auth';
@@ -158,6 +159,11 @@ const MainLayout: React.FC = () => {
           label: '明细查询',
         }
       ]
+    },
+    {
+      key: '/short-urls',
+      icon: <LinkOutlined />,
+      label: '短链管理',
     },
     {
       key: 'settings',
@@ -320,9 +326,11 @@ const MainLayout: React.FC = () => {
             margin: '24px 16px',
             padding: 24,
             minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            ...(location.pathname === '/' ? {} : {
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            })
           }}
         >
           <Outlet />

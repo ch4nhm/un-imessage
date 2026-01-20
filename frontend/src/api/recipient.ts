@@ -7,10 +7,21 @@ export interface Recipient {
   mobile: string;
   email: string;
   openId: string;
-  userId: string;
+  userId: string; // JSON格式字符串，包含各渠道的用户ID
   status: number;
   createdAt: string;
   updatedAt: string;
+}
+
+// 用户ID映射类型
+export interface UserIdMap {
+  [channelType: string]: string;
+}
+
+// 表单中使用的用户ID项类型
+export interface UserIdItem {
+  channelType: string;
+  userId: string;
 }
 
 export const getRecipientPage = (params: any) => {

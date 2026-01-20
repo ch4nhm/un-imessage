@@ -51,18 +51,21 @@ public class DashboardController {
         // 1. 应用总数
         stats.setAppCount(appMapper.selectCount(null));
 
-        // 2. 消息总发送量
-        Long msgCount = detailMapper.selectCount(null);
+        // 2. 消息总发送量 (限制最近30天)
+        LambdaQueryWrapper<LogMsgDetail> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.ge(LogMsgDetail::getCreatedAt, java.time.LocalDateTime.now().minusDays(30));
+        Long msgCount = detailMapper.selectCount(countWrapper);
         stats.setMsgCount(msgCount);
 
         // 3. 用户总数
         stats.setUserCount(userMapper.selectCount(null));
 
-        // 4. 计算成功率 (总成功数 / 总发送数)
+        // 4. 计算成功率 (总成功数 / 总发送数) - 限制最近30天
         if (msgCount > 0) {
-            LambdaQueryWrapper<LogMsgDetail> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(LogMsgDetail::getStatus, DetailStatus.SUCCESS.getCode());
-            Long successCount = detailMapper.selectCount(wrapper);
+            LambdaQueryWrapper<LogMsgDetail> successWrapper = new LambdaQueryWrapper<>();
+            successWrapper.eq(LogMsgDetail::getStatus, DetailStatus.SUCCESS.getCode())
+                         .ge(LogMsgDetail::getCreatedAt, java.time.LocalDateTime.now().minusDays(30));
+            Long successCount = detailMapper.selectCount(successWrapper);
 
             double rate = (double) successCount / msgCount * 100;
             // 保留一位小数
@@ -72,14 +75,14 @@ public class DashboardController {
             stats.setSuccessRate(0.0);
         }
 
-        // 5. 每日发送趋势
+        // 5. 每日发送趋势 (已经限制了7天)
         stats.setTrend(detailMapper.getDailyTrend());
 
         // 6. 渠道分布
         stats.setChannelDist(batchMapper.getChannelDist());
 
-        // 7. 状态分布 (需转换状态码为中文)
-        List<ChartDataDto> statusRaw = detailMapper.getStatusDist();
+        // 7. 状态分布 (需转换状态码为中文) - 限制最近30天
+        List<ChartDataDto> statusRaw = detailMapper.getStatusDistRecent();
         if (statusRaw != null) {
             List<ChartDataDto> statusDist = statusRaw.stream().peek(item -> {
                 try {

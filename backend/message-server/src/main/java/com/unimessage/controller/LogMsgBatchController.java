@@ -7,8 +7,11 @@ import com.unimessage.common.Result;
 import com.unimessage.dto.BatchStatisticsDto;
 import com.unimessage.dto.LogMsgBatchRespDto;
 import com.unimessage.entity.LogMsgBatch;
+import com.unimessage.entity.SysApp;
 import com.unimessage.mapper.LogMsgBatchMapper;
+import com.unimessage.mapper.SysAppMapper;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,9 @@ public class LogMsgBatchController {
     @Resource
     private LogMsgBatchMapper batchMapper;
 
+    @Resource
+    private SysAppMapper appMapper;
+
     /**
      * 分页查询批次列表
      */
@@ -37,6 +43,7 @@ public class LogMsgBatchController {
                                                   @RequestParam(required = false) Long channelId,
                                                   @RequestParam(required = false) Integer status,
                                                   @RequestParam(required = false) String startTime,
+                                                  @RequestParam(required = false) String batchNo,
                                                   @RequestParam(required = false) String endTime) {
         Page<LogMsgBatch> page = new Page<>(current, size);
         LambdaQueryWrapper<LogMsgBatch> wrapper = new LambdaQueryWrapper<>();
@@ -55,6 +62,9 @@ public class LogMsgBatchController {
         }
         if (endTime != null && !endTime.isEmpty()) {
             wrapper.le(LogMsgBatch::getCreatedAt, LocalDateTime.parse(endTime));
+        }
+        if (StringUtils.isNotBlank(batchNo)) {
+            wrapper.like(LogMsgBatch::getBatchNo, batchNo);
         }
 
         wrapper.orderByDesc(LogMsgBatch::getCreatedAt);
@@ -120,6 +130,11 @@ public class LogMsgBatchController {
         }
         LogMsgBatchRespDto dto = new LogMsgBatchRespDto();
         BeanUtils.copyProperties(batch, dto);
+
+        SysApp app = appMapper.selectById(batch.getAppId());
+        if (app != null) {
+            dto.setAppName(app.getAppName());
+        }
         return dto;
     }
 }

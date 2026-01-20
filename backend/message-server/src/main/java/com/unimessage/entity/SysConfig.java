@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 /**
  * 系统配置实体类
+ *
  * @author 海明
  */
 @Data

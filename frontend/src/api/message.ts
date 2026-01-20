@@ -5,6 +5,7 @@ export interface Batch {
     id: number;
     batchNo: string;
     appId: number;
+    appName: string;
     templateId: number;
     channelId: number;
     msgType: number;
@@ -37,6 +38,10 @@ export const getBatchById = (id: number) => {
 
 export const getDetailPage = (params: any) => {
   return request.get('/log/detail/page', { params }) as Promise<PageResult<MessageDetail>>;
+};
+
+export const getDetailByBatchId = (batchId: number, params?: { current?: number; size?: number }) => {
+  return request.get(`/log/detail/batch/${batchId}`, { params }) as Promise<PageResult<MessageDetail>>;
 };
 
 export const retryMessage = (id: number) => {

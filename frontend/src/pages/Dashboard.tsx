@@ -9,6 +9,7 @@ import {
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import { getDashboardStats, type DashboardStats } from '../api/dashboard';
+import ChannelIcon from "./channel/components/ChannelIcon"
 
 const { Title, Paragraph } = Typography;
 
@@ -324,7 +325,34 @@ const Dashboard: React.FC = () => {
                 </Col>
                 <Col xs={24} md={12} xl={7}>
                     <Card title="渠道发送分布" variant="borderless" style={{ borderRadius: 12 }}>
-                        <ReactECharts option={channelPieOption} style={{ height: 250 }} />
+                        <div style={{ display: 'flex', height: 250 }}>
+                            <div style={{ flex: 1 }}>
+                                <ReactECharts 
+                                    option={{
+                                        ...channelPieOption,
+                                        legend: { show: false } // 隐藏默认图例
+                                    }} 
+                                    style={{ height: '100%' }} 
+                                />
+                            </div>
+                            <div style={{ width: 120, paddingLeft: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                {(stats.channelDist || []).map((item: any, index: number) => (
+                                    <div key={item.name} style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                                        <div 
+                                            style={{ 
+                                                width: 8, 
+                                                height: 8, 
+                                                borderRadius: '50%', 
+                                                backgroundColor: modernPalette[index % modernPalette.length],
+                                                marginRight: 8 
+                                            }} 
+                                        />
+                                        <ChannelIcon type={item.name} size={14} style={{ marginRight: 6 }} />
+                                        <span style={{ fontSize: 12, color: '#4b5563' }}>{item.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </Card>
                 </Col>
                 <Col xs={24} md={12} xl={7}>

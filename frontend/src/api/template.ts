@@ -5,6 +5,7 @@ export interface Template {
     id: number;
     name: string;
     code: string;
+    appId?: number;
     channelId: number;
     msgType: number;
     title: string;

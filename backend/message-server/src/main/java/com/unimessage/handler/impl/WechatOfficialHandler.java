@@ -1,5 +1,6 @@
 package com.unimessage.handler.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.unimessage.entity.LogMsgDetail;
@@ -13,8 +14,10 @@ import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,9 +45,12 @@ public class WechatOfficialHandler implements ChannelHandler {
 
         try {
             WxMpService wxMpService = getService(channel);
-
+            String redirectUrlKey = "redirectUrl";
             JSONObject config = JSON.parseObject(channel.getConfigJson());
-            String redirectUrl = config.getString("redirectUrl");
+            String redirectUrl = config.getString(redirectUrlKey);
+            if (params.containsKey(redirectUrlKey)) {
+                redirectUrl = params.get(redirectUrlKey).toString();
+            }
 
             WxMpTemplateMessage.WxMpTemplateMessageBuilder builder = WxMpTemplateMessage.builder()
                     .toUser(msgDetail.getRecipient())
@@ -55,10 +61,23 @@ public class WechatOfficialHandler implements ChannelHandler {
             }
 
             WxMpTemplateMessage msg = builder.build();
-
-            if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    msg.addData(new WxMpTemplateData(entry.getKey(), String.valueOf(entry.getValue())));
+            // 处理变量
+            String variables = template.getVariables();
+            if (StringUtils.isNotBlank(variables)) {
+                List<String> variableList = JSON.parseArray(variables, String.class);
+                for (String variable : variableList) {
+                    Object value = params.get(variable);
+                    if (value != null) {
+                        msg.addData(new WxMpTemplateData(variable, String.valueOf(value)));
+                    }
+                }
+            }
+            // 兼容旧版变量
+            if (StringUtils.isBlank(variables)) {
+                if (CollectionUtil.isNotEmpty(params)) {
+                    for (Map.Entry<String, Object> entry : params.entrySet()) {
+                        msg.addData(new WxMpTemplateData(entry.getKey(), String.valueOf(entry.getValue())));
+                    }
                 }
             }
 

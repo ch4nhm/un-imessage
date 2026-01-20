@@ -3,6 +3,7 @@ package com.unimessage.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serial;
@@ -45,7 +46,8 @@ public class SysRecipient implements Serializable {
     private String openId;
 
     /**
-     * 企微/钉钉/飞书 UserId
+     * 各渠道用户ID (JSON格式)
+     * 格式: {"WECHAT_WORK": "userid1", "DINGTALK": "userid2", "FEISHU": "userid3", ...}
      */
     private String userId;
 
@@ -54,7 +56,9 @@ public class SysRecipient implements Serializable {
      */
     private Integer status;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }

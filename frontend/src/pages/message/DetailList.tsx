@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Tag, message, Tooltip, Card, Form, Input, Select, Space } from 'antd';
+import { Table, Button, Tag, message, Card, Form, Input, Select, Space, Typography } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+
+const { Paragraph } = Typography;
 import type { ColumnsType } from 'antd/es/table';
 import { getDetailPage, retryMessage } from '../../api/message';
 
@@ -80,8 +82,16 @@ const DetailList: React.FC = () => {
         title: '发送内容',
         dataIndex: 'content',
         key: 'content',
-        ellipsis: true,
-        render: (text) => text ? <Tooltip title={text}>{text}</Tooltip> : '-'
+        width: 250,
+        render: (text) => text ? (
+          <Paragraph 
+            ellipsis={{ rows: 2, expandable: true, symbol: '展开' }} 
+            style={{ marginBottom: 0, fontSize: 12 }}
+            copyable
+          >
+            {text}
+          </Paragraph>
+        ) : '-'
     },
     {
         title: '状态',
@@ -102,8 +112,16 @@ const DetailList: React.FC = () => {
       title: '失败原因',
       dataIndex: 'errorMsg',
       key: 'errorMsg',
-      ellipsis: true,
-      render: (text) => text ? <Tooltip title={text}>{text}</Tooltip> : '-'
+      width: 200,
+      render: (text) => text ? (
+        <Paragraph 
+          ellipsis={{ rows: 2, expandable: true, symbol: '展开' }} 
+          style={{ marginBottom: 0, fontSize: 12 }}
+          copyable
+        >
+          {text}
+        </Paragraph>
+      ) : '-'
     },
     {
       title: '重试次数',
@@ -121,9 +139,14 @@ const DetailList: React.FC = () => {
       fixed: 'right',
       width: 100,
       render: (_, record) => (
-        record.status === 30 ? (
-            <Button type="link" onClick={() => handleRetry(record.id)}>重试</Button>
-        ) : null
+        <Button 
+          type="link" 
+          disabled={record.status !== 30}
+          icon={<ReloadOutlined />}
+          onClick={() => handleRetry(record.id)}
+        >
+          重试
+        </Button>
       ),
     },
   ];

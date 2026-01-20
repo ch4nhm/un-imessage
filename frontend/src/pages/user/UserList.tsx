@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Space, Modal, Form, Input, message, Popconfirm, Card } from 'antd';
+import { EditOutlined, KeyOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getUserPage, createUser, updateUser, deleteUser, resetPassword, type User } from '../../api/user';
 
@@ -130,10 +131,10 @@ const UserList: React.FC = () => {
       width: 250,
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record)}>编辑</Button>
-          <Button type="link" onClick={() => handleResetPassword(record)}>重置密码</Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
+          <Button type="link" icon={<KeyOutlined />} onClick={() => handleResetPassword(record)}>重置密码</Button>
           <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" danger>删除</Button>
+            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),

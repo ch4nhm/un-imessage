@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Space, Modal, Form, Input, message, Popconfirm, Tag, Card } from 'antd';
+import { EditOutlined, KeyOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getAppPage, createApp, updateApp, deleteApp, resetAppSecret } from '../../api/app';
 import type { App } from '../../api/app';
@@ -128,12 +129,12 @@ const AppList: React.FC = () => {
       width: 250,
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record)}>编辑</Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
           <Popconfirm title="确定重置密钥吗?" onConfirm={() => handleResetSecret(record.id)}>
-            <Button type="link">重置密钥</Button>
+            <Button type="link" icon={<KeyOutlined />}>重置密钥</Button>
           </Popconfirm>
           <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" danger>删除</Button>
+            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
