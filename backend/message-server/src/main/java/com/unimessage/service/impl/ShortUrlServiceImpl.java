@@ -70,7 +70,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         // 2. 检查是否已存在相同URL的短链
         ShortUrl existing = findByOriginalUrl(request.getUrl());
         if (existing != null && existing.getStatus() == 1) {
-            return buildResponse(existing);
+            throw new IllegalArgumentException("该URL已存在");
         }
 
         // 3. 生成短链码

@@ -158,12 +158,7 @@ const RecipientList: React.FC = () => {
             dataIndex: 'email',
         },
         {
-            title: 'OpenId',
-            dataIndex: 'openId',
-            ellipsis: true,
-        },
-        {
-            title: 'UserId',
+            title: '渠道配置信息',
             dataIndex: 'userId',
             ellipsis: true,
             render: (userId: string) => {
@@ -292,11 +287,11 @@ const RecipientList: React.FC = () => {
                     <Form.Item name="email" label="邮箱">
                         <Input/>
                     </Form.Item>
-                    <Form.Item name="openId" label="微信OpenID">
-                        <Input/>
-                    </Form.Item>
 
-                    <Divider>企业用户ID配置</Divider>
+                    <Divider>多渠道ID配置</Divider>
+                    <div style={{marginBottom: 16, color: '#666', fontSize: '12px'}}>
+                        配置不同渠道的接收者标识，如微信OpenID、企微/钉钉/飞书的UserID等
+                    </div>
                     <Form.List name="userIds">
                         {(fields, {add, remove}) => (
                             <>

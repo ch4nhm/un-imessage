@@ -41,13 +41,8 @@ public class SysRecipient implements Serializable {
     private String email;
 
     /**
-     * 微信OpenID
-     */
-    private String openId;
-
-    /**
      * 各渠道用户ID (JSON格式)
-     * 格式: {"WECHAT_WORK": "userid1", "DINGTALK": "userid2", "FEISHU": "userid3", ...}
+     * 格式: {"WECHAT_OFFICIAL": "openid", "WECHAT_WORK": "userid1", "DINGTALK": "userid2", "FEISHU": "userid3", ...}
      */
     private String userId;
 

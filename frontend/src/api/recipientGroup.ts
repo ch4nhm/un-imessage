@@ -3,7 +3,8 @@ import type { PageResult } from './types';
 
 export interface RecipientGroup {
   id: number;
-  groupName: string;
+  name: string; // 后端返回字段为 name
+  code?: string;
   description: string;
   status: number;
   createdAt: string;
@@ -32,4 +33,8 @@ export const updateRecipientGroup = (id: number, data: any) => {
 
 export const deleteRecipientGroup = (id: number) => {
   return request.delete(`/recipient-group/${id}`);
+};
+
+export const updateRecipientGroupStatus = (id: number, status: number) => {
+  return request.put(`/recipient-group/${id}/status`, null, { params: { status } });
 };

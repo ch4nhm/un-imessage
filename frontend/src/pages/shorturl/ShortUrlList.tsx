@@ -69,8 +69,11 @@ const ShortUrlList: React.FC = () => {
       message.success('创建成功');
       setIsModalOpen(false);
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      if (error?.response?.data?.message) {
+         message.error(error.response.data.message);
+      }
     }
   };
 

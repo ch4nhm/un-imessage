@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Input, Modal, Form, message, Space, Popconfirm, Tag, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, PoweroffOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { 
   getRecipientGroupPage, 
   createRecipientGroup, 
   updateRecipientGroup, 
   deleteRecipientGroup,
-  getGroupRecipientIds
+  getGroupRecipientIds,
+  updateRecipientGroupStatus
 } from '../../api/recipientGroup';
 import type { RecipientGroup } from '../../api/recipientGroup';
 import { getRecipientList } from '../../api/recipient';
@@ -119,6 +120,17 @@ const RecipientGroupList: React.FC = () => {
     }
   };
 
+  const handleStatusChange = async (record: RecipientGroup) => {
+    try {
+        const newStatus = record.status === 1 ? 0 : 1;
+        await updateRecipientGroupStatus(record.id, newStatus);
+        message.success('状态更新成功');
+        loadData();
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
   const columns: ColumnsType<RecipientGroup> = [
     {
       title: 'ID',
@@ -127,7 +139,7 @@ const RecipientGroupList: React.FC = () => {
     },
     {
       title: '分组名称',
-      dataIndex: 'groupName',
+      dataIndex: 'name',
     },
     {
       title: '描述',
@@ -149,7 +161,7 @@ const RecipientGroupList: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 150,
+      width: 220,
       fixed: 'right',
       render: (_, record) => (
         <Space size="middle">
@@ -159,6 +171,13 @@ const RecipientGroupList: React.FC = () => {
             onClick={() => handleEdit(record)}
           >
             编辑
+          </Button>
+          <Button 
+            type="text" 
+            icon={<PoweroffOutlined />} 
+            onClick={() => handleStatusChange(record)}
+          >
+            {record.status === 1 ? '禁用' : '启用'}
           </Button>
           <Popconfirm
             title="确定要删除吗？"
@@ -216,7 +235,7 @@ const RecipientGroupList: React.FC = () => {
         width={600}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="groupName" label="分组名称" rules={[{ required: true }]}>
+          <Form.Item name="name" label="分组名称" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item name="description" label="描述">

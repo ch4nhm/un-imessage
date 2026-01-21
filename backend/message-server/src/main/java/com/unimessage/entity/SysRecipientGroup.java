@@ -36,6 +36,11 @@ public class SysRecipientGroup implements Serializable {
     private String code;
 
     /**
+     * 状态
+     */
+    private Integer status;
+
+    /**
      * 描述
      */
     private String description;
