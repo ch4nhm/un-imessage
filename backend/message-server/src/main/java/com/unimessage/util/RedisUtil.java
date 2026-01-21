@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * Redis 工具类
  * 封装 Redis 基础操作，提供统一的访问接口
  *
- * @author Trae
+ * @author 海明
  * @since 2026-01-14
  */
 @Slf4j

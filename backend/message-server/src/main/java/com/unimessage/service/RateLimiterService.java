@@ -3,7 +3,7 @@ package com.unimessage.service;
 /**
  * 限流服务
  *
- * @author Trae
+ * @author 海明
  * @since 2025-12-25
  */
 public interface RateLimiterService {

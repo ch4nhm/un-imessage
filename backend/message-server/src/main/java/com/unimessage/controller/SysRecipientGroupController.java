@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * 接收者分组管理控制器
  *
- * @author Trae
+ * @author 海明
  * @since 2025-12-11
  */
 @RestController

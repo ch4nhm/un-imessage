@@ -12,7 +12,7 @@ import java.util.Collections;
 /**
  * 限流服务实现
  *
- * @author Trae
+ * @author 海明
  * @since 2025-12-25
  */
 @Slf4j

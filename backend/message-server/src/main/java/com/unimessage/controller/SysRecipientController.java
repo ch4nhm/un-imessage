@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 接收者管理控制器
  *
- * @author Trae
+ * @author 海明
  * @since 2025-12-11
  */
 @RestController
