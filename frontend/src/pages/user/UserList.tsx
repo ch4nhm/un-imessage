@@ -110,19 +110,9 @@ const UserList: React.FC = () => {
       key: 'nickname',
     },
     {
-      title: '邮箱',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: '手机号',
-      dataIndex: 'phone',
-      key: 'phone',
-    },
-    {
       title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
     },
     {
       title: '操作',
@@ -177,12 +167,6 @@ const UserList: React.FC = () => {
             </Form.Item>
           )}
           <Form.Item name="nickname" label="昵称">
-            <Input />
-          </Form.Item>
-          <Form.Item name="email" label="邮箱">
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="手机号">
             <Input />
           </Form.Item>
         </Form>

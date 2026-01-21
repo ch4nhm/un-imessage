@@ -16,6 +16,7 @@ UniMessage 是一个企业级统一消息推送平台，采用微服务架构设
 - **易于集成**: SDK 自动装配，开箱即用
 - **灵活配置**: 模板、渠道、接收者独立管理
 - **企业级**: 权限认证、异常处理、数据安全
+- **短链接**: 自带短链接生成、访问统计与追踪
 
 ## 🏗️ 技术架构
 
@@ -151,6 +152,9 @@ public interface ChannelHandler {
 | `sys_recipient_group_relation` | 分组关联表 (多对多)       |
 | `log_msg_batch`                | 消息发送批次记录表         |
 | `log_msg_detail`               | 消息发送详情表           |
+| `short_url`                    | 短链接映射表             |
+| `short_url_access_log`         | 短链接访问日志表         |
+| `short_url_ip_blacklist`       | 短链接IP黑名单表         |
 | `sys_config`                   | 系统基础配置表           |
 
 ### 状态码定义
@@ -184,7 +188,23 @@ public interface ChannelHandler {
 - Redis 6.0+
 - Kafka 或 RocketMQ
 
-### 后端启动
+### Docker 部署 (推荐)
+
+项目支持通过 Docker Compose 一键启动后端服务。
+
+1. **构建并启动**
+
+```bash
+cd backend/message-server
+docker-compose up -d --build
+```
+
+2. **服务检查**
+
+- 后端服务端口: `8079`
+- 挂载日志目录: `backend/message-server/logs`
+
+### 后端启动 (本地开发)
 
 ```bash
 # 1. 初始化数据库
@@ -207,6 +227,26 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### Docker 部署前端 (推荐)
+
+项目提供了前端 Docker 镜像构建配置，内置 Nginx 服务器。
+
+1. **构建并启动**
+
+```bash
+cd frontend
+pnpm run build
+```
+
+2. **Nginx 配置说明**
+
+前端使用 Nginx 托管静态资源，并反向代理后端 API。默认配置 (`nginx.conf`) 监听 `80` 端口，将 `/api/` 开头的请求转发到后端服务。
+
+- 访问地址: `http://localhost:80`
+- 接口转发: `http://localhost:80/api/` -> `http://backend:8079/api/`
+
+**注意**: 请确保 Nginx 配置中的后端服务地址 (`proxy_pass`) 正确指向运行中的后端容器或服务地址。
 
 ### SDK 集成
 
@@ -340,11 +380,13 @@ rocketmq:
   name-server: localhost:9876
 ```
 
-## 📝 测试数据
+## 📝 ### 测试数据
 
 项目提供了完整的测试数据脚本，包含:
 
-- 3 个系统用户 (admin/operator/developer，密码: 123456)
+- **2 个系统用户** (密码: `123456`)
+  - `admin` (管理员)
+  - `operator` (运营人员)
 - 4 个接入应用 (订单系统/用户中心/营销平台/监控告警)
 - 8 个消息渠道 (短信/邮件/微信/钉钉/飞书)
 - 11 个消息模板

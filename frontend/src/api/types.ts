@@ -2,10 +2,9 @@ export interface User {
   id: number;
   username: string;
   nickname?: string;
-  email?: string;
-  phone?: string;
   status: number;
-  createTime: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface LoginResult {
