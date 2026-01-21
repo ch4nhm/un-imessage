@@ -7,14 +7,18 @@ import com.unimessage.entity.SysChannel;
 import com.unimessage.entity.SysTemplate;
 import com.unimessage.enums.ChannelType;
 import com.unimessage.handler.ChannelHandler;
+import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * 邮件发送处理器
- * 基于 Hutool MailUtil 实现 SMTP 邮件发送
+ * 重构：使用 Spring JavaMailSender 替代 Hutool 以解决 Jakarta/Javax 冲突
  *
  * @author 海明
  * @since 2025-12-04
@@ -33,6 +37,7 @@ public class EmailHandler implements ChannelHandler {
         log.info("开始发送邮件: recipient={}", msgDetail.getRecipient());
 
         try {
+            // 1. 解析配置
             JSONObject config = JSON.parseObject(channel.getConfigJson());
             String host = config.getString("host");
             Integer port = config.getInteger("port");
@@ -42,25 +47,50 @@ public class EmailHandler implements ChannelHandler {
 
             validateConfig(host, port, username, password);
 
-            cn.hutool.extra.mail.MailAccount account = new cn.hutool.extra.mail.MailAccount();
-            account.setHost(host);
-            account.setPort(port);
-            account.setAuth(true);
-            account.setFrom(username);
-            account.setUser(username);
-            account.setPass(password);
-            account.setSslEnable(ssl != null && ssl);
+            // 2. 动态构建 JavaMailSender
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            mailSender.setHost(host);
+            mailSender.setPort(port);
+            mailSender.setUsername(username);
+            mailSender.setPassword(password);
+            mailSender.setDefaultEncoding("UTF-8");
 
+            Properties props = mailSender.getJavaMailProperties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.connectiontimeout", "5000");
+            props.put("mail.smtp.timeout", "5000");
+            props.put("mail.smtp.writetimeout", "5000");
+
+            if (Boolean.TRUE.equals(ssl)) {
+                props.put("mail.smtp.ssl.enable", "true");
+                // 某些环境可能需要指定 socketFactory，但在 Spring Boot 3 + Jakarta Mail 中通常只需 ssl.enable
+            }
+
+            // 3. 构建邮件内容
             String content = renderContent(template.getContent(), params);
             msgDetail.setContent(content);
 
-            String msgId = cn.hutool.extra.mail.MailUtil.send(account,
-                    msgDetail.getRecipient(),
-                    template.getTitle(),
-                    content,
-                    false);
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            
+            helper.setFrom(username);
+            helper.setTo(msgDetail.getRecipient());
+            helper.setSubject(template.getTitle());
+            // true 表示支持 HTML
+            helper.setText(content, true);
 
-            log.info("邮件发送成功: msgId={}", msgId);
+            // 4. 发送
+            mailSender.send(mimeMessage);
+
+            // JavaMailSender 不直接返回 Message-ID，通常如果没报错即为成功
+            String msgId = mimeMessage.getMessageID();
+            if (msgId == null) {
+            // Fallback
+                msgId = String.valueOf(System.currentTimeMillis());
+            }
+
+            log.info("邮件发送成功");
             msgDetail.setThirdPartyMsgId(msgId);
             return true;
 
