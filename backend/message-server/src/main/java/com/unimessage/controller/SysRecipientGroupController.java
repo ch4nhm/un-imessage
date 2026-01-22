@@ -90,7 +90,7 @@ public class SysRecipientGroupController {
     public Result<SysRecipientGroup> create(@RequestBody SysRecipientGroupDto groupDto) {
         SysRecipientGroup group = new SysRecipientGroup();
         BeanUtils.copyProperties(groupDto, group);
-
+        group.setName(groupDto.getGroupName());
         group.setCreatedAt(LocalDateTime.now());
         group.setUpdatedAt(LocalDateTime.now());
         groupMapper.insert(group);
@@ -157,6 +157,21 @@ public class SysRecipientGroupController {
 
         // Delete group
         groupMapper.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 更新分组状态
+     */
+    @PutMapping("/{id}/status")
+    public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
+        SysRecipientGroup group = groupMapper.selectById(id);
+        if (group == null) {
+            return Result.fail("分组不存在");
+        }
+        group.setStatus(status);
+        group.setUpdatedAt(LocalDateTime.now());
+        groupMapper.updateById(group);
         return Result.success();
     }
 }

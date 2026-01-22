@@ -199,6 +199,21 @@ cd backend/message-server
 docker-compose up -d --build
 ```
 
+或使用项目根目录下的自动化部署脚本 (推荐):
+
+**Windows (PowerShell)**:
+```powershell
+.\deploy.ps1
+```
+
+**Linux / macOS**:
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+脚本将引导您配置数据库和Redis连接信息，自动生成 `.env` 文件并启动服务。
+
 2. **服务检查**
 
 - 后端服务端口: `8079`

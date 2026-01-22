@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  # 后端服务
+  unimessage-server:
+    build: 
+      context: ./backend/message-server
+      dockerfile: Dockerfile
+    image: unimessage-server:latest
+    container_name: unimessage-server
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - JAVA_OPTS=${JAVA_OPTS}
+      # 数据库配置映射
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      # Redis 配置映射
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8079:8079"
+    networks:
+      - unimessage-net
+
+  # 前端服务
+  unimessage-web:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: unimessage-web:latest
+    container_name: unimessage-web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - unimessage-server
+    networks:
+      - unimessage-net
+
+networks:
+  unimessage-net:
+    driver: bridge

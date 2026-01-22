@@ -234,8 +234,7 @@ public class MessageServiceImpl implements MessageService {
             String contact = switch (type) {
                 case SMS, TENCENT_SMS, TWILIO -> r.getMobile();
                 case EMAIL -> r.getEmail();
-                case WECHAT_OFFICIAL -> r.getOpenId();
-                case WECHAT_WORK, DINGTALK, FEISHU, TELEGRAM, SLACK, WEBHOOK -> {
+                case WECHAT_OFFICIAL, WECHAT_WORK, DINGTALK, FEISHU, TELEGRAM, SLACK, WEBHOOK -> {
                     // 从JSON格式的userId中提取对应渠道的用户ID
                     String userId = extractUserIdByChannelType(r.getUserId(), channelType);
                     // 如果没有对应渠道的userId，回退到手机号

@@ -164,16 +164,9 @@ const TemplateList: React.FC = () => {
             key: 'name',
         },
         {
-            title: '代码',
+            title: '模板编码',
             dataIndex: 'code',
             key: 'code',
-        },
-        {
-            title: '第三方ID',
-            dataIndex: 'thirdPartyId',
-            key: 'thirdPartyId',
-            width: 150,
-            ellipsis: true,
         },
         {
             title: '所属应用',
@@ -198,11 +191,6 @@ const TemplateList: React.FC = () => {
                     </Space>
                 ) : channelId;
             }
-        },
-        {
-            title: '标题',
-            dataIndex: 'title',
-            key: 'title',
         },
         {
             title: '限流(TPS)',
@@ -310,7 +298,7 @@ const TemplateList: React.FC = () => {
                         <Select
                             mode="multiple"
                             allowClear
-                            options={groups.map(g => ({label: g.groupName, value: g.id}))}
+                            options={groups.map(g => ({label: g.name, value: g.id}))}
                             placeholder="选择关联的接收者分组"
                         />
                     </Form.Item>
