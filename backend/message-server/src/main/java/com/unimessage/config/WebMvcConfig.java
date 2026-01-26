@@ -22,15 +22,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // App 鉴权拦截器 - 仅针对消息发送接口
+        // App 鉴权拦截器 - 针对消息发送接口和短链创建接口
         registry.addInterceptor(appAuthInterceptor)
-                .addPathPatterns("/api/v1/message/**", "/api/v1/short-url/**");
+                .addPathPatterns("/api/v1/message/**")
+                // 只对短链创建接口使用 App 鉴权
+                .addPathPatterns("/api/v1/short-url")
+                // 排除其他短链管理接口
+                .excludePathPatterns("/api/v1/short-url/**");
 
-        // Sa-Token 登录拦截器 - 针对管理后台接口
+        // Sa-Token 登录拉截器 - 针对管理后台接口
         registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
                 .addPathPatterns("/api/**")
                 // 排除消息发送接口
-                .excludePathPatterns("/api/v1/message/**","/api/v1/short-url/**")
+                .excludePathPatterns("/api/v1/message/**")
+                // 排除短链创建接口（使用 App 鉴权）
+                .excludePathPatterns("/api/v1/short-url")
                 // 排除登录接口
                 .excludePathPatterns("/api/v1/auth/login")
                 // 排除健康检查
